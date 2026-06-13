@@ -9,7 +9,7 @@ logging.basicConfig(
 logger = logging.getLogger("chatbot_backend")
 
 # Inspect and warn about placeholder credentials
-if settings.SUPABASE_URL == "https://placeholder-url.supabase.co" or settings.SUPABASE_KEY == "placeholder-anon-key":
+if settings.SUPABASE_URL == "https://placeholder-url.supabase.co" or getattr(settings, "SUPABASE_ANON_KEY", "placeholder-anon-key") == "placeholder-anon-key":
     logger.warning(
         "Using placeholder Supabase URL or Key. Please configure real credentials in .env "
         "for actual Supabase integrations."
