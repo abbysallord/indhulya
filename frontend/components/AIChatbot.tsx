@@ -43,13 +43,16 @@ function formatMessage(text: string) {
     
     if (isList) {
       return (
-        <ul key={index} className="list-disc pl-5 my-2 space-y-1">
+        <ul key={index} className="space-y-2 my-2.5 pl-0.5">
           {lines.map((line, idx) => {
             const trimmed = line.trim();
             if (trimmed === "") return null;
             const cleanLine = trimmed.replace(/^[\s-*]+|^\d+\.\s*/, "");
             return (
-              <li key={idx} dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(cleanLine) }} />
+              <li key={idx} className="flex items-start gap-2 text-gray-700 leading-relaxed">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E5B94E] mt-1.5 flex-shrink-0" />
+                <span dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(cleanLine) }} />
+              </li>
             );
           })}
         </ul>
@@ -59,12 +62,20 @@ function formatMessage(text: string) {
     return (
       <p 
         key={index} 
-        className={index > 0 ? "mt-2" : ""}
+        className={index > 0 ? "mt-2.5" : ""}
         dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(para) }}
       />
     );
   });
 }
+
+const SUGGESTIONS = [
+  { label: "✨ Aura Collection", query: "Tell me about the Aura Collection." },
+  { label: "💍 Custom Orders", query: "Can I customize a design?" },
+  { label: "🚚 Shipping Policy", query: "How long does shipping take?" },
+  { label: "🔄 Return Policy", query: "What is your return policy?" },
+  { label: "💎 Platinum Jewelry", query: "Show me items in Platinum." }
+];
 
 export default function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -107,19 +118,14 @@ export default function AIChatbot() {
           }
         })
         .catch((err) => {
-          console.error("Failed to load past session history:", err);
+          console.info("Guest session expired or not found on server, starting fresh:", err.message);
           localStorage.removeItem("indhulya_chat_session_id");
           setSessionId(null);
         });
     }
   }, []);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim() || isLoading) return;
-
-    const userText = inputValue;
-    setInputValue("");
+  const submitMessage = async (userText: string) => {
     setIsLoading(true);
 
     // Add user message
@@ -172,6 +178,20 @@ export default function AIChatbot() {
     }
   };
 
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim() || isLoading) return;
+
+    const userText = inputValue;
+    setInputValue("");
+    submitMessage(userText);
+  };
+
+  const handleSuggestionClick = (query: string) => {
+    if (isLoading) return;
+    submitMessage(query);
+  };
+
   return (
     <>
       <AnimatePresence>
@@ -205,25 +225,68 @@ export default function AIChatbot() {
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAF9F6]" data-lenis-prevent>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAF9F6] scroll-smooth" data-lenis-prevent>
               {messages.map((msg) => (
-                <div 
+                <motion.div 
+                  initial={{ opacity: 0, y: 12, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 28 }}
                   key={msg.id} 
-                  className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+                  className={`flex gap-2.5 items-start ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                 >
+                  {/* Bot Avatar */}
+                  {msg.sender === "bot" && (
+                    <div className="w-7 h-7 rounded-full bg-[#5C1218] text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5">
+                      <Sparkles className="w-3.5 h-3.5 text-[#E5B94E]" />
+                    </div>
+                  )}
+
                   <div 
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
+                    className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                       msg.sender === "user" 
-                        ? "bg-[#5C1218] text-white rounded-br-sm" 
-                        : "bg-white border border-gray-200 text-gray-800 rounded-bl-sm shadow-sm"
+                        ? "bg-gradient-to-br from-[#5C1218] to-[#7c1c24] text-white rounded-tr-none shadow-sm" 
+                        : "bg-white border border-gray-100 text-gray-800 rounded-tl-none shadow-sm"
                     }`}
                   >
                     {formatMessage(msg.text)}
                   </div>
-                </div>
+                </motion.div>
               ))}
+
+              {/* Typing Indicator */}
+              {isLoading && (
+                <div className="flex gap-2.5 items-start justify-start">
+                  <div className="w-7 h-7 rounded-full bg-[#5C1218] text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 animate-pulse">
+                    <Sparkles className="w-3.5 h-3.5 text-[#E5B94E]" />
+                  </div>
+                  <div className="bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-none px-4 py-3 text-sm shadow-sm flex items-center gap-2">
+                    <span className="text-xs text-gray-400">Typing</span>
+                    <span className="flex gap-1">
+                      <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping" />
+                      <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping [animation-delay:0.2s]" />
+                      <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping [animation-delay:0.4s]" />
+                    </span>
+                  </div>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
+
+            {/* Quick Suggestions */}
+            {messages.length <= 2 && (
+              <div className="px-4 py-2 bg-[#FAF9F6] border-t border-gray-100/50 flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth" data-lenis-prevent>
+                {SUGGESTIONS.map((s, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSuggestionClick(s.query)}
+                    className="flex-shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full bg-white border border-gray-200 text-[#5C1218] hover:bg-gray-50 hover:border-[#E5B94E] transition-colors shadow-xs cursor-pointer"
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Input Area */}
             <div className="p-4 bg-white border-t border-gray-100">
