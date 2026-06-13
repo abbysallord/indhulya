@@ -53,18 +53,8 @@ def login_endpoint(request: LoginRequest):
                 detail=f"Authentication failed: {str(e)}"
             )
     else:
-        logger.warning(f"Supabase not configured. Performing mock sign-in for {email}")
-        
-        # For testing, accept standard admin credentials or any development login
-        if email == "admin@indhulya.com" and password == "admin123":
-            return LoginResponse(
-                access_token="mock-jwt-token-xyz-123",
-                token_type="bearer",
-                user_id="mock-user-id-0000-0000",
-                user_email=email
-            )
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Authentication failed. Invalid mock credentials. (Use 'admin@indhulya.com' and 'admin123' for local tests)."
-            )
+        logger.error(f"Supabase not configured. Rejecting login attempt for {email}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Authentication service is not configured."
+        )

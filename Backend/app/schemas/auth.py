@@ -9,7 +9,8 @@ class LoginRequest(BaseModel):
     password: str = Field(
         ...,
         description="The user's password.",
-        min_length=6
+        min_length=8,
+        pattern=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
     )
 
 class LoginResponse(BaseModel):
