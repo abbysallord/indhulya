@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import PROJECT_NAME, API_V1_STR
 from app.core.settings import settings
-from app.api.routes import chat, health
+from app.api.routes import chat, health, auth
 
 # Create the FastAPI app instance
 app = FastAPI(
@@ -33,3 +33,4 @@ def read_root():
 # Mount modular routes
 app.include_router(health.router, prefix="/health", tags=["Health"])
 app.include_router(chat.router, prefix="/chat", tags=["Chat"])
+app.include_router(auth.router, prefix="/auth", tags=["Auth"])
