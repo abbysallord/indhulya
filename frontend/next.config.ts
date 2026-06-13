@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["misaccused-walker-invigoratively.ngrok-free.dev"],
   images: {
     remotePatterns: [
       {
