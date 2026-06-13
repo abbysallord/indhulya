@@ -1,25 +1,27 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Request
 from app.schemas.auth import LoginRequest, LoginResponse
 from app.db.supabase import supabase
 from app.core.config import logger
 from app.core.settings import settings
+from app.core.limiter import limiter
 
 router = APIRouter()
 
 @router.post("/login", response_model=LoginResponse)
-def login_endpoint(request: LoginRequest):
+@limiter.limit("10/minute")
+def login_endpoint(request: Request, login_data: LoginRequest):
     """
     Authenticates a user using Supabase Auth.
     Falls back to a mock authentication if Supabase is not configured (for local development).
     """
-    email = request.email.lower().strip()
-    password = request.password
+    email = login_data.email.lower().strip()
+    password = login_data.password
     
     # Check if Supabase client is configured
     is_supabase_configured = (
         supabase is not None 
         and settings.SUPABASE_URL != "https://placeholder-url.supabase.co"
-        and settings.SUPABASE_KEY != "placeholder-anon-key"
+        and getattr(settings, "SUPABASE_ANON_KEY", "placeholder-anon-key") != "placeholder-anon-key"
     )
     
     if is_supabase_configured:

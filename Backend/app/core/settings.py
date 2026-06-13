@@ -8,7 +8,8 @@ class Settings(BaseSettings):
     
     # Supabase configuration (with placeholder defaults for local fallback)
     SUPABASE_URL: str = "https://placeholder-url.supabase.co"
-    SUPABASE_KEY: str = "placeholder-anon-key"
+    SUPABASE_ANON_KEY: str = "placeholder-anon-key"
+    SUPABASE_SERVICE_ROLE_KEY: str = "placeholder-service-key"
     
     # LLM keys
     GROQ_API_KEY: str = ""

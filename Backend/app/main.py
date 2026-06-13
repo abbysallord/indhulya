@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
 from app.core.config import PROJECT_NAME, API_V1_STR
 from app.core.settings import settings
+from app.core.limiter import limiter
 from app.api.routes import chat, health, auth
 
 # Create the FastAPI app instance
@@ -12,6 +15,10 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+# Setup Rate Limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Add CORS Middleware to enable communication with the Frontend
 app.add_middleware(

@@ -6,7 +6,7 @@ supabase: Client = None
 
 try:
     # Setup Supabase client
-    supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+    supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
     logger.info("Supabase client successfully initialized.")
 except Exception as e:
     logger.error(f"Error during Supabase client initialization: {str(e)}")
