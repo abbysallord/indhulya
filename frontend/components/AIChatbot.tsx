@@ -16,6 +16,8 @@ export default function AIChatbot() {
     { id: 1, text: "Welcome to Indhulya! How can I help you find the perfect piece of jewelry today?", sender: "bot" }
   ]);
   const [inputValue, setInputValue] = useState("");
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -26,24 +28,92 @@ export default function AIChatbot() {
     scrollToBottom();
   }, [messages, isOpen]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  // Load guest session and history on mount
+  useEffect(() => {
+    const storedSessionId = localStorage.getItem("indhulya_chat_session_id");
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    
+    if (storedSessionId) {
+      setSessionId(storedSessionId);
+      fetch(`${backendUrl}/chat/sessions/${storedSessionId}`)
+        .then((res) => {
+          if (res.ok) return res.json();
+          throw new Error("Session not found");
+        })
+        .then((data) => {
+          if (data.messages && data.messages.length > 0) {
+            const formatted = data.messages.map((m: any) => ({
+              id: m.id || Date.now(),
+              text: m.content,
+              sender: m.role === "user" ? "user" : "bot" as "user" | "bot"
+            }));
+            setMessages(formatted);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to load past session history:", err);
+          localStorage.removeItem("indhulya_chat_session_id");
+          setSessionId(null);
+        });
+    }
+  }, []);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isLoading) return;
+
+    const userText = inputValue;
+    setInputValue("");
+    setIsLoading(true);
 
     // Add user message
-    const newUserMsg: Message = { id: Date.now(), text: inputValue, sender: "user" };
+    const newUserMsg: Message = { id: Date.now(), text: userText, sender: "user" };
     setMessages((prev) => [...prev, newUserMsg]);
-    setInputValue("");
 
-    // Simulate bot response
-    setTimeout(() => {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+    try {
+      const response = await fetch(`${backendUrl}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: userText,
+          session_id: sessionId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get response");
+      }
+
+      const data = await response.json();
+
+      // Store the session ID returned by the backend
+      if (data.session_id) {
+        setSessionId(data.session_id);
+        localStorage.setItem("indhulya_chat_session_id", data.session_id);
+      }
+
+      // Add bot reply
       const botResponse: Message = { 
         id: Date.now() + 1, 
-        text: "Thank you for your message. Our AI assistant is currently in demo mode, but our jewelry experts would love to help you find the perfect match. Please reach out via our contact section!", 
+        text: data.response, 
         sender: "bot" 
       };
       setMessages((prev) => [...prev, botResponse]);
-    }, 1000);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      const errorMsg: Message = {
+        id: Date.now() + 1,
+        text: "I'm having trouble connecting to our server right now. Please try again in a moment.",
+        sender: "bot"
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -106,12 +176,13 @@ export default function AIChatbot() {
                   type="text" 
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Ask about our collections..." 
-                  className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#5C1218] transition-shadow"
+                  disabled={isLoading}
+                  placeholder={isLoading ? "Thinking..." : "Ask about our collections..."} 
+                  className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#5C1218] transition-shadow disabled:opacity-75"
                 />
                 <button 
                   type="submit"
-                  disabled={!inputValue.trim()}
+                  disabled={!inputValue.trim() || isLoading}
                   className="w-10 h-10 rounded-full bg-[#E5B94E] text-[#5C1218] flex items-center justify-center hover:bg-[#d4a944] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                 >
                   <Send className="w-4 h-4 ml-0.5" />
