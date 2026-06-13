@@ -10,6 +10,62 @@ type Message = {
   sender: "bot" | "user";
 };
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function parseInlineMarkdown(text: string): string {
+  const escaped = escapeHtml(text);
+  // Bold formatting: **text** -> <strong>text</strong>
+  let formatted = escaped.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  // Italic formatting: *text* -> <em>text</em>
+  formatted = formatted.replace(/\*(.*?)\*/g, "<em>$1</em>");
+  return formatted;
+}
+
+function formatMessage(text: string) {
+  const paragraphs = text.split("\n\n");
+  
+  return paragraphs.map((para, index) => {
+    const lines = para.split("\n");
+    const isList = lines.every(line => {
+      const trimmed = line.trim();
+      return trimmed === "" || trimmed.startsWith("-") || trimmed.startsWith("*") || /^\d+\./.test(trimmed);
+    }) && lines.some(line => {
+      const trimmed = line.trim();
+      return trimmed.startsWith("-") || trimmed.startsWith("*") || /^\d+\./.test(trimmed);
+    });
+    
+    if (isList) {
+      return (
+        <ul key={index} className="list-disc pl-5 my-2 space-y-1">
+          {lines.map((line, idx) => {
+            const trimmed = line.trim();
+            if (trimmed === "") return null;
+            const cleanLine = trimmed.replace(/^[\s-*]+|^\d+\.\s*/, "");
+            return (
+              <li key={idx} dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(cleanLine) }} />
+            );
+          })}
+        </ul>
+      );
+    }
+    
+    return (
+      <p 
+        key={index} 
+        className={index > 0 ? "mt-2" : ""}
+        dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(para) }}
+      />
+    );
+  });
+}
+
 export default function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -149,7 +205,7 @@ export default function AIChatbot() {
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAF9F6] hide-scrollbar">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAF9F6]" data-lenis-prevent>
               {messages.map((msg) => (
                 <div 
                   key={msg.id} 
@@ -162,7 +218,7 @@ export default function AIChatbot() {
                         : "bg-white border border-gray-200 text-gray-800 rounded-bl-sm shadow-sm"
                     }`}
                   >
-                    {msg.text}
+                    {formatMessage(msg.text)}
                   </div>
                 </div>
               ))}
