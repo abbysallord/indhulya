@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Shop for demifine jewellery pieces for your everyday use from INDHULYA. Bracelets, necklaces, rings, earrings, mangalsutras and much more. waterproof, tarnishproof and hypoallergenic jewellery. Affordable luxury jewellery for everyday.",
 };
 
+import SmoothScroll from "@/components/SmoothScroll";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +29,9 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans text-black bg-[#F7F7F7]">{children}</body>
+      <body className="min-h-full flex flex-col font-sans text-black bg-[#F7F7F7]">
+        <SmoothScroll>{children}</SmoothScroll>
+      </body>
     </html>
   );
 }
