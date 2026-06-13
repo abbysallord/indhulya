@@ -23,12 +23,9 @@ class ChatService:
         # Save user query to DB (mock function call)
         queries.save_chat_message(session_id=session_id, role="user", content=user_message)
         
-        # Mock assistant response generation (future Grok API integration point)
-        assistant_reply = (
-            f"This is a mock response from the AI Chatbot Backend. "
-            f"You said: '{user_message}'. "
-            f"The connection to Supabase and backend services is ready for expansion."
-        )
+        # Generate real response from Groq API via LLMService
+        from app.services.llm_service import llm_service
+        assistant_reply = llm_service.generate_chat_response(user_message)
         
         # Save assistant response to DB (mock function call)
         queries.save_chat_message(session_id=session_id, role="assistant", content=assistant_reply)

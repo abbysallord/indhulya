@@ -11,7 +11,8 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str = "placeholder-anon-key"
     
     # LLM keys
-    GROK_API_KEY: str = ""
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "llama-3.1-8b-instant"
     
     # CORS config
     ALLOWED_ORIGINS: List[str] = ["*"]
