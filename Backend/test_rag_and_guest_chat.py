@@ -88,5 +88,66 @@ class TestRAGAndGuestChat(unittest.TestCase):
         self.assertEqual(prompt_messages[2]["role"], "user")
         self.assertEqual(prompt_messages[2]["content"], "recommend a ring")
 
+    def test_query_classifier_intents(self):
+        """
+        Verify query classifications match expectations for different intents.
+        """
+        from app.services.rag.classifier import QueryClassifier
+        
+        self.assertEqual(QueryClassifier.classify("What is 22K gold?"), "MATERIAL")
+        self.assertEqual(QueryClassifier.classify("Show me diamond rings"), "PRODUCT")
+        self.assertEqual(QueryClassifier.classify("What is your return policy?"), "POLICY")
+        self.assertEqual(QueryClassifier.classify("Tell me about bridal collections"), "COLLECTION")
+        self.assertEqual(QueryClassifier.classify("Hi there"), "GREETING")
+        self.assertEqual(QueryClassifier.classify("help me custom design"), "FAQ")
+        self.assertEqual(QueryClassifier.classify("some generic query about nothing"), "GENERAL")
+
+    def test_synonym_expansion(self):
+        """
+        Verify that synonyms are expanded properly by the retriever.
+        """
+        expanded = rag_service.retriever.expand_query_synonyms("engagement ring")
+        self.assertIn("bridal", expanded)
+        self.assertIn("wedding", expanded)
+        self.assertIn("band", expanded)
+        self.assertIn("engagement", expanded)
+        self.assertIn("ring", expanded)
+
+    def test_retrieval_logging_analytics(self):
+        """
+        Verify that retrieval queries correctly log structured JSON lines to retrieval_analytics.jsonl.
+        """
+        import json
+        
+        # Ensure log path is resolved
+        log_path = rag_service.log_path
+        
+        # Record number of lines before query
+        initial_lines = []
+        if log_path.exists():
+            with open(log_path, "r", encoding="utf-8") as f:
+                initial_lines = f.readlines()
+        
+        # Execute query
+        test_query = "Does Indhulya sell 18k gold jewelry?"
+        rag_service.get_context(test_query)
+        
+        # Read lines after query
+        self.assertTrue(log_path.exists(), "Analytics log file was not created/found")
+        with open(log_path, "r", encoding="utf-8") as f:
+            final_lines = f.readlines()
+            
+        self.assertEqual(len(final_lines), len(initial_lines) + 1)
+        last_line = final_lines[-1].strip()
+        
+        log_data = json.loads(last_line)
+        self.assertEqual(log_data["query"], test_query)
+        self.assertEqual(log_data["detected_query_type"], "MATERIAL")
+        self.assertIn("18k", log_data["expanded_query"])
+        self.assertIn("gold", log_data["expanded_query"])
+        self.assertIn("retrieved_doc_ids", log_data)
+        self.assertIn("document_scores", log_data)
+        self.assertIn("retrieval_latency_ms", log_data)
+
 if __name__ == "__main__":
     unittest.main()

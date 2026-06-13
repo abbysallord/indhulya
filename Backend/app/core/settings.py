@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     LLM_MAX_RETRIES: int = 3
     MAX_HISTORY_MESSAGES: int = 10
     
+    # Retrieval (RAG) Strategy Settings
+    RAG_MAX_RESULTS: int = 3
+    RAG_MIN_SCORE_THRESHOLD: float = 0.01
+    RAG_ENABLE_METADATA_FILTERING: bool = True
+    RAG_ENABLE_SYNONYM_EXPANSION: bool = True
+    RAG_ENABLE_QUERY_CLASSIFICATION: bool = True
+    
     # CORS config
     ALLOWED_ORIGINS: List[str] = ["*"]
     
