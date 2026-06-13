@@ -1,0 +1,22 @@
+[
+  {
+    "category": "Shipping",
+    "question": "How long does shipping take?",
+    "answer": "Standard shipping takes 3-5 business days. Made-to-order items require 4-6 weeks for production before shipment."
+  },
+  {
+    "category": "Returns",
+    "question": "What is your return policy?",
+    "answer": "We offer a 30-day return policy for unworn items in original packaging. Made-to-order and custom-designed pieces are final sale and non-refundable."
+  },
+  {
+    "category": "Warranty",
+    "question": "Do you offer a warranty?",
+    "answer": "Yes, Indhulya provides a lifetime warranty against manufacturing defects on all gold and platinum pieces. This does not cover normal wear and tear or accidental damage."
+  },
+  {
+    "category": "Custom Orders",
+    "question": "Can I customize a design?",
+    "answer": "Absolutely. We offer customization for materials, sizes, and gemstones. Please contact our support team at support@indhulya.com to begin your custom design consultation."
+  }
+]

@@ -1,5 +1,6 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from typing import Optional
 from app.db.supabase import supabase
 from app.core.config import logger
 
@@ -27,6 +28,33 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         
     except Exception as e:
         logger.error(f"Error validating user token: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+def get_optional_current_user(request: Request) -> Optional[dict]:
+    """
+    Optional authentication dependency.
+    If the Authorization header is present, validates it.
+    If it is absent, returns None (allowing guest access).
+    """
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        return None
+        
+    parts = auth_header.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        return None
+        
+    token = parts[1]
+    try:
+        auth_response = supabase.auth.get_user(token)
+        user = auth_response.user
+        return user
+    except Exception as e:
+        logger.error(f"Error validating optional user token: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

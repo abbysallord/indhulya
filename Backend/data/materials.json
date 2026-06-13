@@ -1,0 +1,23 @@
+[
+  {
+    "id": "18k-gold",
+    "name": "18K Yellow Gold",
+    "description": "A premium alloy consisting of 75% pure gold and 25% copper/silver to provide excellent durability and a warm, classic yellow lustre.",
+    "care_instructions": "Clean with warm soapy water and a soft lint-free cloth. Store in a fabric-lined box. Keep away from household chemicals like bleach and chlorine.",
+    "certifications": "BIS Hallmarked (750 purity status)"
+  },
+  {
+    "id": "sterling-silver",
+    "name": "925 Sterling Silver",
+    "description": "A beautiful bright silver alloy containing 92.5% silver and 7.5% copper. Offers a brilliant polished finish ideal for traditional designs.",
+    "care_instructions": "Store in airtight containers to prevent tarnish. Use a specialized silver polishing cloth to remove tarnish, and keep it completely dry.",
+    "certifications": "Certified 925 Sterling Silver"
+  },
+  {
+    "id": "platinum-950",
+    "name": "950 Platinum",
+    "description": "An extremely rare, dense, and naturally white noble metal containing 95% pure platinum. It is naturally hypoallergenic and retains its color forever.",
+    "care_instructions": "Wash with warm water and mild dish soap. Use a soft brush for crevices. Requires professional polishing to restore its high-shine finish if patina develops.",
+    "certifications": "Pt950 Certified & Hypoallergenic tested"
+  }
+]
