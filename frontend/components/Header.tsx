@@ -14,29 +14,17 @@ export default function Header() {
     <header className="w-full bg-white/80 backdrop-blur-xl border-b border-white/50 shadow-sm sticky top-0 z-50 transition-all duration-300">
       {/* Upper Tier */}
       <div className="flex items-center justify-between px-4 md:px-6 py-4 max-w-[1440px] mx-auto">
-        {/* Left: Mobile Hamburger, Logo & Pincode */}
-        <div className="flex items-center gap-4 relative">
+        {/* Left: Mobile Hamburger & Pincode */}
+        <div className="flex-1 flex items-center text-xs font-semibold relative">
           <button 
-            className="md:hidden text-gray-700 hover:text-black"
+            className="md:hidden mr-4 text-gray-700 hover:text-black"
             aria-label="Toggle mobile menu"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
-          
-          <Link href="/" className="flex items-center">
-            <Image 
-              src="/Indhulya_logo.avif" 
-              alt="Indhulya Logo" 
-              width={280} 
-              height={80} 
-              className="object-contain hover:opacity-80 transition-opacity h-auto w-auto max-h-[40px] md:max-h-[60px]" 
-              priority
-            />
-          </Link>
-
           <div 
-            className="hidden md:flex items-center cursor-pointer hover:text-gray-600 text-xs font-semibold ml-4"
+            className="hidden md:flex items-center cursor-pointer hover:text-gray-600"
             onClick={() => setIsPincodeOpen(!isPincodeOpen)}
           >
             Enter Pincode <ChevronDown className="w-4 h-4 ml-1" />
@@ -53,8 +41,22 @@ export default function Header() {
           )}
         </div>
 
+        {/* Center: Logo */}
+        <div className="flex-1 flex justify-center">
+          <Link href="/" className="flex items-center justify-center">
+            <Image 
+              src="/Indhulya_logo.avif" 
+              alt="Indhulya Logo" 
+              width={280} 
+              height={80} 
+              className="object-contain hover:opacity-80 transition-opacity h-auto w-auto max-h-[40px] md:max-h-[60px]" 
+              priority
+            />
+          </Link>
+        </div>
+
         {/* Right: Actions */}
-        <div className="flex items-center justify-end gap-4 md:gap-6">
+        <div className="flex-1 flex items-center justify-end gap-3 md:gap-5">
           <div className="hidden md:flex items-center relative">
             <div className="flex items-center bg-black/5 rounded-full px-4 py-2 w-48 focus-within:w-64 transition-all duration-300">
               <input 
