@@ -3,6 +3,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const showcaseImages = [
   { id: 1, src: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=800&fit=crop", title: "Temple Masterpieces" },
@@ -14,6 +15,15 @@ const showcaseImages = [
 ];
 
 export default function FlashyShowcase() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  const displayImages = mounted ? [...showcaseImages, ...showcaseImages, ...showcaseImages] : showcaseImages;
+
   return (
     <section className="relative py-24 bg-[#FAF9F6] overflow-hidden">
       {/* Background Decorative Element */}
@@ -63,7 +73,7 @@ export default function FlashyShowcase() {
       <div className="relative flex overflow-hidden group py-12">
         {/* We use 3 sets to ensure it can fill ultra-wide monitors without a gap */}
         <div className="animate-marquee flex whitespace-nowrap w-max">
-          {[...showcaseImages, ...showcaseImages, ...showcaseImages].map((img, index) => (
+          {displayImages.map((img, index) => (
             <div 
               key={`${img.id}-${index}`} 
               className="relative w-[70vw] sm:w-[45vw] md:w-[28vw] lg:w-[22vw] aspect-[3/4] flex-shrink-0 rounded-2xl overflow-hidden shadow-xl mx-3 md:mx-5 cursor-pointer group/card"

@@ -17,13 +17,17 @@ export default function Loading() {
             transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
             className="absolute inset-2 border-b-2 border-l-2 border-[#E5B94E] rounded-full opacity-60"
           />
-          <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 flex items-center justify-center">
             <span className="font-serif text-[#5C1218] text-xl font-bold tracking-widest">I</span>
-          </div>
+          </motion.div>
         </div>
         
         {/* Loading Text */}
         <motion.div
+          initial={{ opacity: 0 }}
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
           className="mt-6 text-xs font-bold tracking-[0.3em] uppercase text-[#5C1218]"

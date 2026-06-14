@@ -130,7 +130,7 @@ export default function ProductGrid({ title, products, viewAllLink }: ProductGri
         )}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {products.map((product, index) => (
           <ProductCardItem key={product.id} product={product} priority={index < 4} />
         ))}

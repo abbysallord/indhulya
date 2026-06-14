@@ -120,10 +120,10 @@ export default function Home() {
         <HeroCarousel />
         <TrustTicker />
         <div id="categories"><CategoryCircles /></div>
-        <div id="bestsellers"><ProductGrid title="Indhulya Top Styles" products={topStylesProducts} viewAllLink="#" /></div>
+        <div id="bestsellers"><ProductGrid title="Indhulya Top Styles" products={topStylesProducts} viewAllLink="/products" /></div>
         <PromoBanner />
         <div id="shop-by-recipient"><CardSlider title="Shop By Recipient" cards={recipientCards} /></div>
-        <div id="one-gram-gold"><ProductGrid title="One Gram Gold Collection" products={fineGoldProducts} viewAllLink="#" /></div>
+        <div id="one-gram-gold"><ProductGrid title="One Gram Gold Collection" products={fineGoldProducts} viewAllLink="/products" /></div>
         <FlashyShowcase />
         <div id="occasions"><CardSlider title="For Every Occasion" cards={occasionCards} aspectRatio="square" /></div>
         <div id="editorial"><EditorialSection /></div>

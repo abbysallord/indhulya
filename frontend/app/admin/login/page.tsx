@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, ArrowRight, LockKeyhole } from "lucide-react";
 import { login } from "@/app/actions/auth";
@@ -25,7 +25,7 @@ export default function AdminLogin() {
         setError(res.error || "Login failed");
         setIsLoading(false);
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
       setIsLoading(false);
     }

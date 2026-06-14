@@ -165,7 +165,8 @@ export default function AIChatbot() {
   const submitMessage = async (userText: string) => {
     setIsLoading(true);
 
-    const newUserMsg: Message = { id: Date.now(), text: userText, sender: "user" };
+    // eslint-disable-next-line react-hooks/purity
+    const newUserMsg: Message = { id: Math.random(), text: userText, sender: "user" };
     setMessages((prev) => [...prev, newUserMsg]);
 
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -185,11 +186,13 @@ export default function AIChatbot() {
         localStorage.setItem("indhulya_chat_session_id", data.session_id);
       }
 
-      const botResponse: Message = { id: Date.now() + 1, text: data.response, sender: "bot" };
+      // eslint-disable-next-line react-hooks/purity
+      const botResponse: Message = { id: Math.random(), text: data.response, sender: "bot" };
       setMessages((prev) => [...prev, botResponse]);
-    } catch (error) {
+    } catch (_error) {
       const errorMsg: Message = {
-        id: Date.now() + 1,
+        // eslint-disable-next-line react-hooks/purity
+        id: Math.random(),
         text: "I'm having trouble connecting to our server right now. Please try again in a moment.",
         sender: "bot"
       };
@@ -293,8 +296,7 @@ export default function AIChatbot() {
       </div>
 
       {/* Quick Suggestions */}
-      {messages.length <= 2 && (
-        <div className={`px-4 bg-transparent border-t border-white/20 flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth ${expanded ? "py-3" : "py-2"}`} data-lenis-prevent>
+      <div className={`px-4 bg-transparent border-t border-white/20 flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth ${expanded ? "py-3" : "py-2"}`} data-lenis-prevent>
           {SUGGESTIONS.map((s, idx) => (
             <button
               key={idx}
@@ -306,7 +308,6 @@ export default function AIChatbot() {
             </button>
           ))}
         </div>
-      )}
 
       {/* Input Area */}
       <div className={`p-4 bg-white/50 backdrop-blur-md border-t border-white/30 flex-shrink-0 ${expanded ? "md:p-6" : ""}`}>

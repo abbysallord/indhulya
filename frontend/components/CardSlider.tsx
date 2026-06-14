@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 
 type Card = {
   id: string;
@@ -18,6 +19,7 @@ type CardSliderProps = {
 
 export default function CardSlider({ title, cards, aspectRatio = "portrait" }: CardSliderProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -56,7 +58,7 @@ export default function CardSlider({ title, cards, aspectRatio = "portrait" }: C
         className="flex gap-4 md:gap-6 overflow-x-auto hide-scrollbar snap-x snap-mandatory"
       >
         {cards.map((card) => (
-          <div key={card.id} className="min-w-[70vw] md:min-w-[300px] flex-shrink-0 snap-center group cursor-pointer" onClick={() => alert(`Opening category: ${card.title}`)}>
+          <div key={card.id} className="min-w-[70vw] md:min-w-[300px] flex-shrink-0 snap-center group cursor-pointer" onClick={() => router.push('/products')}>
             <div className={`relative w-full ${aspectRatio === "square" ? "aspect-square" : "aspect-[3/4]"} overflow-hidden mb-4 bg-gray-100`}>
               <Image
                 src={card.image}

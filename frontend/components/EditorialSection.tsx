@@ -1,8 +1,9 @@
 "use client";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 export default function EditorialSection() {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
@@ -53,25 +54,27 @@ export default function EditorialSection() {
                 className="text-gray-600 mb-8 leading-relaxed max-w-lg"
               >
                 {"\"Every piece is a reflection of elegance and rich cultural heritage. Curated with a deep appreciation for traditional craftsmanship, these are timeless designs that perfectly blend antique artistry with modern wearability.\"".split(" ").map((word, idx) => (
+                  <React.Fragment key={idx}>
                   <motion.span 
-                    key={idx}
                     variants={{
                       hidden: { opacity: 0, filter: "blur(10px)", y: 10 },
                       visible: { opacity: 1, filter: "blur(0px)", y: 0 }
                     }}
                     transition={{ duration: 0.5 }}
-                    className="inline-block mr-1"
+                    className="inline-block"
                   >
                     {word}
                   </motion.span>
+                  {" "}
+                </React.Fragment>
                 ))}
               </motion.div>
-              <button 
-                onClick={() => alert("Redirecting to Collection...")}
-                className="border border-black text-black px-8 py-3 text-sm font-bold tracking-widest uppercase hover:bg-black hover:text-white transition-colors"
+              <Link 
+                href="/products"
+                className="inline-block text-center border border-black text-black px-8 py-3 text-sm font-bold tracking-widest uppercase hover:bg-black hover:text-white transition-colors"
               >
                 Explore Collection
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -107,25 +110,27 @@ export default function EditorialSection() {
                 className="text-gray-600 mb-8 leading-relaxed max-w-lg"
               >
                 {"Indhulya brings you authentic South Indian heritage jewelry. Specializing in One Gram Gold, exquisite Temple designs, and intricate Antique Nakshi work, we offer timeless elegance without the price tag of solid gold.".split(" ").map((word, idx) => (
+                  <React.Fragment key={idx}>
                   <motion.span 
-                    key={idx}
                     variants={{
                       hidden: { opacity: 0, filter: "blur(10px)", y: 10 },
                       visible: { opacity: 1, filter: "blur(0px)", y: 0 }
                     }}
                     transition={{ duration: 0.5 }}
-                    className="inline-block mr-1"
+                    className="inline-block"
                   >
                     {word}
                   </motion.span>
+                  {" "}
+                </React.Fragment>
                 ))}
               </motion.div>
-              <button 
-                onClick={() => alert("Loading Indhulya Story...")}
-                className="border border-black text-black px-8 py-3 text-sm font-bold tracking-widest uppercase hover:bg-black hover:text-white transition-colors"
+              <Link 
+                href="/products"
+                className="inline-block text-center border border-black text-black px-8 py-3 text-sm font-bold tracking-widest uppercase hover:bg-black hover:text-white transition-colors"
               >
                 Read Our Story
-              </button>
+              </Link>
             </div>
           </div>
         </div>

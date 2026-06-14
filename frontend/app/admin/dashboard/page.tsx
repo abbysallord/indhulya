@@ -106,7 +106,7 @@ export default function DashboardIndex() {
     <div className="w-full max-w-7xl mx-auto">
       <div className="mb-10">
         <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Welcome back, Admin</h2>
-        <p className="text-slate-500 font-medium tracking-wide text-sm">Here is what's happening with your store today.</p>
+        <p className="text-slate-500 font-medium tracking-wide text-sm">Here is what&apos;s happening with your store today.</p>
       </div>
 
       {/* Metrics Grid - White Glassmorphism */}

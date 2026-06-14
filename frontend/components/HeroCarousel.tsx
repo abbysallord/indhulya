@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const slides = [
   {
@@ -117,10 +118,10 @@ export default function HeroCarousel() {
                   alt="Indhulya Jewelry Collection"
                   fill
                   className="object-cover object-center"
-                  priority={true}
+                  priority={index === 1}
                   sizes="(max-width: 768px) 100vw, 50vw" />
               </div>
-              <div className="w-full h-[55%] md:h-full md:w-1/2 flex flex-col items-center justify-center text-center px-4 pb-20 pt-6 md:p-8 bg-[#FAF9F6]">
+              <div className="w-full h-[55%] md:h-full md:w-1/2 flex flex-col items-center justify-center text-center px-4 pb-12 pt-4 md:p-8 bg-[#FAF9F6]">
                 <motion.h2
                   initial="hidden"
                   animate={isVisible ? "visible" : "hidden"}
@@ -128,7 +129,7 @@ export default function HeroCarousel() {
                     visible: { transition: { staggerChildren: 0.08 } },
                     hidden: { transition: { staggerChildren: 0.02, staggerDirection: -1 } },
                   }}
-                  className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#5C1218] mb-4 tracking-wide"
+                  className="font-serif text-3xl md:text-5xl lg:text-6xl text-[#5C1218] mb-4 tracking-wide"
                 >
                   {slide.title.split("").map((char, idx) => (
                     <motion.span
@@ -158,12 +159,12 @@ export default function HeroCarousel() {
                 <p className="text-gray-700 text-sm md:text-base tracking-widest uppercase mb-8">
                   {slide.description}
                 </p>
-                <button
-                  onClick={() => alert(`Navigating to ${slide.title} collection...`)}
+                <Link
+                  href="/products"
                   className="border-b-2 border-black text-black font-semibold text-sm tracking-widest uppercase pb-1 hover:text-gray-600 hover:border-gray-600 transition-colors"
                 >
                   Shop Now
-                </button>
+                </Link>
               </div>
             </div>
           );

@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { Search, MapPin, Heart, ShoppingBag, ChevronDown } from "lucide-react";
+import { Search, MapPin, Heart, ShoppingBag, ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -8,15 +8,22 @@ export default function Header() {
   const [isPincodeOpen, setIsPincodeOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <header className="w-full bg-white/80 backdrop-blur-xl border-b border-white/50 shadow-sm sticky top-0 z-50 transition-all duration-300">
       {/* Upper Tier */}
-      <div className="flex items-center justify-between px-6 py-4 max-w-[1440px] mx-auto">
-        {/* Left: Pincode */}
-        <div className="flex-1 hidden md:flex items-center text-xs font-semibold relative">
+      <div className="flex items-center justify-between px-4 md:px-6 py-4 max-w-[1440px] mx-auto">
+        {/* Left: Mobile Hamburger & Pincode */}
+        <div className="flex-1 flex items-center text-xs font-semibold relative">
+          <button 
+            className="md:hidden mr-4 text-gray-700 hover:text-black"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
           <div 
-            className="flex items-center cursor-pointer hover:text-gray-600"
+            className="hidden md:flex items-center cursor-pointer hover:text-gray-600"
             onClick={() => setIsPincodeOpen(!isPincodeOpen)}
           >
             Enter Pincode <ChevronDown className="w-4 h-4 ml-1" />
@@ -41,14 +48,14 @@ export default function Header() {
               alt="Indhulya Logo" 
               width={280} 
               height={80} 
-              className="object-contain hover:opacity-80 transition-opacity h-auto w-auto max-h-[60px]" 
+              className="object-contain hover:opacity-80 transition-opacity h-auto w-auto max-h-[40px] md:max-h-[60px]" 
               priority
             />
           </Link>
         </div>
 
         {/* Right: Actions */}
-        <div className="flex-1 flex items-center justify-end gap-5">
+        <div className="flex-1 flex items-center justify-end gap-3 md:gap-5">
           <div className="hidden md:flex items-center relative">
             <div className="flex items-center bg-black/5 rounded-full px-4 py-2 w-48 focus-within:w-64 transition-all duration-300">
               <input 
@@ -79,6 +86,9 @@ export default function Header() {
               </div>
             )}
           </div>
+          <button className="md:hidden text-gray-700 hover:text-black">
+             <Search className="w-5 h-5" />
+          </button>
           <button onClick={() => alert("Opening Store Locator...")} className="hidden sm:block text-gray-700 hover:text-black">
             <MapPin className="w-5 h-5" />
           </button>
@@ -94,26 +104,26 @@ export default function Header() {
       </div>
 
       {/* Lower Tier: Navigation */}
-      <nav className="w-full overflow-x-auto hide-scrollbar border-t border-black/5">
-        <ul className="flex items-center justify-center gap-10 py-4 px-4 min-w-max mx-auto text-xs font-semibold tracking-wider uppercase text-gray-700">
-          <li className="relative group cursor-pointer hover:text-black transition-colors">
+      <nav className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:block w-full border-t border-black/5 bg-white/95 md:bg-transparent absolute md:relative left-0 top-full md:top-auto shadow-md md:shadow-none`}>
+        <ul className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 py-6 md:py-4 px-4 min-w-max mx-auto text-xs font-semibold tracking-wider uppercase text-gray-700">
+          <li className="relative group cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
             <Link href="#one-gram-gold">
               <span className="absolute -top-4 -right-4 bg-[#E5B94E] text-black text-[8px] px-2 py-0.5 rounded-full font-bold shadow-sm">Luxe</span>
               One Gram Gold
             </Link>
           </li>
-          <li className="relative group cursor-pointer hover:text-black transition-colors">
+          <li className="relative group cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
             <Link href="#editorial">
               <span className="absolute -top-4 -right-4 bg-red-500 text-white text-[8px] px-2 py-0.5 rounded-full font-bold shadow-sm">New</span>
               Temple Jewelry
             </Link>
           </li>
-          <li className="cursor-pointer hover:text-black transition-colors"><Link href="#bestsellers">Best Sellers</Link></li>
-          <li className="cursor-pointer hover:text-black transition-colors"><Link href="#categories">Necklaces</Link></li>
-          <li className="cursor-pointer hover:text-black transition-colors"><Link href="#categories">Earrings</Link></li>
-          <li className="cursor-pointer hover:text-black transition-colors"><Link href="#categories">Bracelets</Link></li>
-          <li className="cursor-pointer hover:text-black transition-colors"><Link href="#categories">Bangles & Kada</Link></li>
-          <li className="cursor-pointer hover:text-black transition-colors"><Link href="#categories">Jhumkas</Link></li>
+          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="#bestsellers">Best Sellers</Link></li>
+          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="#categories">Necklaces</Link></li>
+          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="#categories">Earrings</Link></li>
+          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="#categories">Bracelets</Link></li>
+          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="#categories">Bangles & Kada</Link></li>
+          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="#categories">Jhumkas</Link></li>
         </ul>
       </nav>
     </header>

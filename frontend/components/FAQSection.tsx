@@ -71,7 +71,7 @@ export default function FAQSection() {
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full flex justify-between items-center p-6 md:px-8 bg-white/50 backdrop-blur-md rounded-2xl border border-white shadow-sm hover:bg-white/80 transition-colors text-left"
+                  className="w-full flex justify-between items-center p-6 md:px-8 bg-white/50 backdrop-blur-md rounded-2xl border border-white shadow-sm hover:bg-white/80 transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C1218] focus-visible:ring-offset-2"
                 >
                   <span className={`font-medium md:text-lg transition-colors ${isOpen ? "text-[#5C1218]" : "text-gray-900"}`}>
                     {faq.question}
