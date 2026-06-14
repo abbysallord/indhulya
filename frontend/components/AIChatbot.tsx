@@ -248,7 +248,7 @@ export default function AIChatbot() {
       </div>
 
       {/* Chat Area */}
-      <div className={`flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-[#FAF9F6] scroll-smooth ${expanded ? "text-base" : "text-sm"}`} data-lenis-prevent>
+      <div className={`flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-transparent scroll-smooth ${expanded ? "text-base" : "text-sm"}`} data-lenis-prevent>
         {messages.map((msg) => (
           <motion.div 
             initial={{ opacity: 0, y: 12, scale: 0.97 }}
@@ -266,7 +266,7 @@ export default function AIChatbot() {
               className={`max-w-[75%] rounded-2xl px-4 py-2.5 leading-relaxed ${
                 msg.sender === "user" 
                   ? "bg-gradient-to-br from-[#5C1218] to-[#7c1c24] text-white rounded-tr-none shadow-sm" 
-                  : "bg-white border border-gray-100 text-gray-800 rounded-tl-none shadow-sm"
+                  : "bg-white/90 border border-white/50 text-gray-800 rounded-tl-none shadow-sm"
               }`}
             >
               {formatMessage(msg.text)}
@@ -279,7 +279,7 @@ export default function AIChatbot() {
             <div className={`rounded-full bg-[#5C1218] text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 animate-pulse ${expanded ? "w-8 h-8" : "w-7 h-7"}`}>
               <Sparkles className={`text-[#E5B94E] ${expanded ? "w-4 h-4" : "w-3.5 h-3.5"}`} />
             </div>
-            <div className="bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-2">
+            <div className="bg-white/90 border border-white/50 text-gray-800 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-2">
               <span className="text-gray-400">Typing</span>
               <span className="flex gap-1">
                 <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping" />
@@ -294,13 +294,13 @@ export default function AIChatbot() {
 
       {/* Quick Suggestions */}
       {messages.length <= 2 && (
-        <div className={`px-4 bg-[#FAF9F6] border-t border-gray-100/50 flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth ${expanded ? "py-3" : "py-2"}`} data-lenis-prevent>
+        <div className={`px-4 bg-transparent border-t border-white/20 flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth ${expanded ? "py-3" : "py-2"}`} data-lenis-prevent>
           {SUGGESTIONS.map((s, idx) => (
             <button
               key={idx}
               type="button"
               onClick={() => handleSuggestionClick(s.query)}
-              className="flex-shrink-0 text-[11px] md:text-xs font-semibold px-3 py-1.5 rounded-full bg-white border border-gray-200 text-[#5C1218] hover:bg-gray-50 hover:border-[#E5B94E] transition-colors shadow-xs cursor-pointer"
+              className="flex-shrink-0 text-[11px] md:text-xs font-semibold px-3 py-1.5 rounded-full bg-white/80 border border-white/50 text-[#5C1218] hover:bg-white hover:border-[#E5B94E] transition-colors shadow-xs cursor-pointer"
             >
               {s.label}
             </button>
@@ -309,7 +309,7 @@ export default function AIChatbot() {
       )}
 
       {/* Input Area */}
-      <div className={`p-4 bg-white border-t border-gray-100 flex-shrink-0 ${expanded ? "md:p-6" : ""}`}>
+      <div className={`p-4 bg-white/50 backdrop-blur-md border-t border-white/30 flex-shrink-0 ${expanded ? "md:p-6" : ""}`}>
         <form onSubmit={handleSendMessage} className="flex gap-2">
           <input 
             ref={inputRef}
@@ -318,7 +318,7 @@ export default function AIChatbot() {
             onChange={(e) => setInputValue(e.target.value)}
             disabled={isLoading}
             placeholder={isLoading ? "Thinking..." : "Ask about our collections..."} 
-            className={`flex-1 bg-gray-100 rounded-full px-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#5C1218] transition-shadow disabled:opacity-75 ${expanded ? "py-3 text-base" : "py-2"}`}
+            className={`flex-1 bg-white/70 rounded-full px-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#5C1218] transition-shadow disabled:opacity-75 ${expanded ? "py-3 text-base" : "py-2"}`}
           />
           <button 
             type="submit"
@@ -329,7 +329,7 @@ export default function AIChatbot() {
           </button>
         </form>
         <div className="text-center mt-2">
-          <span className="text-[9px] text-gray-400 uppercase tracking-widest">Powered by AI</span>
+          <span className="text-[9px] text-gray-500 uppercase tracking-widest">Powered by AI</span>
         </div>
       </div>
     </>
@@ -347,7 +347,7 @@ export default function AIChatbot() {
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 350, damping: 30 }}
             style={{ borderRadius: "1rem" }}
-            className="fixed bottom-24 right-6 w-80 md:w-96 h-[500px] max-h-[80vh] bg-white shadow-2xl overflow-hidden z-[100] border border-gray-100 flex flex-col"
+            className="fixed bottom-24 right-6 w-80 md:w-96 h-[500px] max-h-[80vh] bg-white/80 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] overflow-hidden z-[100] border border-white/50 flex flex-col"
           >
             {renderChatContent(false)}
           </motion.div>
@@ -378,7 +378,7 @@ export default function AIChatbot() {
               }}
               transition={{ duration: 0.3, ease: "easeOut" }}
               style={{ borderRadius: "1.5rem" }}
-              className="w-full max-w-4xl h-[85vh] bg-white overflow-hidden relative shadow-2xl z-10 flex flex-col origin-center"
+              className="w-full max-w-4xl h-[85vh] bg-white/80 backdrop-blur-2xl overflow-hidden relative shadow-2xl border border-white/50 z-10 flex flex-col origin-center"
             >
               {renderChatContent(true)}
             </motion.div>

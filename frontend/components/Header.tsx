@@ -10,7 +10,7 @@ export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
-    <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="w-full bg-white/80 backdrop-blur-xl border-b border-white/50 shadow-sm sticky top-0 z-50 transition-all duration-300">
       {/* Upper Tier */}
       <div className="flex items-center justify-between px-6 py-4 max-w-[1440px] mx-auto">
         {/* Left: Pincode */}
@@ -22,7 +22,7 @@ export default function Header() {
             Enter Pincode <ChevronDown className="w-4 h-4 ml-1" />
           </div>
           {isPincodeOpen && (
-            <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 shadow-lg rounded p-4 z-50 min-w-[200px]">
+            <div className="absolute top-full left-0 mt-2 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded p-4 z-50 min-w-[200px]">
               <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Select Area</p>
               <ul className="space-y-2 text-sm font-normal">
                 <li className="cursor-pointer hover:bg-gray-50 p-1 rounded" onClick={() => setIsPincodeOpen(false)}>500033 - Jubilee Hills</li>
@@ -50,7 +50,7 @@ export default function Header() {
         {/* Right: Actions */}
         <div className="flex-1 flex items-center justify-end gap-5">
           <div className="hidden md:flex items-center relative">
-            <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 w-48 focus-within:w-64 transition-all duration-300">
+            <div className="flex items-center bg-black/5 rounded-full px-4 py-2 w-48 focus-within:w-64 transition-all duration-300">
               <input 
                 type="text" 
                 placeholder="Search..." 
@@ -63,7 +63,7 @@ export default function Header() {
               <Search className="w-4 h-4 text-gray-500" />
             </div>
             {isSearchOpen && searchQuery.length > 0 && (
-              <div className="absolute top-full right-0 mt-2 w-64 bg-white border border-gray-200 shadow-lg rounded p-4 z-50">
+              <div className="absolute top-full right-0 mt-2 w-64 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded p-4 z-50">
                 <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Suggested Results</p>
                 <ul className="space-y-2 text-sm font-normal">
                   <li className="cursor-pointer hover:bg-gray-50 p-2 border-b border-gray-100" onClick={() => alert('Searching for: ' + searchQuery + ' Necklaces')}>
@@ -94,7 +94,7 @@ export default function Header() {
       </div>
 
       {/* Lower Tier: Navigation */}
-      <nav className="w-full overflow-x-auto hide-scrollbar border-t border-gray-100">
+      <nav className="w-full overflow-x-auto hide-scrollbar border-t border-black/5">
         <ul className="flex items-center justify-center gap-10 py-4 px-4 min-w-max mx-auto text-xs font-semibold tracking-wider uppercase text-gray-700">
           <li className="relative group cursor-pointer hover:text-black transition-colors">
             <Link href="#one-gram-gold">
