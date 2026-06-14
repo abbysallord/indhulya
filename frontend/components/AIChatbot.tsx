@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Sparkles } from "lucide-react";
+import { MessageCircle, X, Send, Sparkles, Maximize2, Minimize2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Message = {
@@ -20,9 +20,7 @@ function escapeHtml(text: string): string {
 
 function parseInlineMarkdown(text: string): string {
   const escaped = escapeHtml(text);
-  // Bold formatting: **text** -> <strong>text</strong>
   let formatted = escaped.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-  // Italic formatting: *text* -> <em>text</em>
   formatted = formatted.replace(/\*(.*?)\*/g, "<em>$1</em>");
   return formatted;
 }
@@ -78,9 +76,20 @@ const SUGGESTIONS = [
 
 export default function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    { id: 1, text: "Welcome to Indhulya! How can I help you find the perfect piece of jewelry today?", sender: "bot" }
-  ]);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("indhulya_chat_messages");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to parse local storage messages", e);
+        }
+      }
+    }
+    return [{ id: 1, text: "Welcome to Indhulya! How can I help you find the perfect piece of jewelry today?", sender: "bot" }];
+  });
   const [inputValue, setInputValue] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
@@ -89,7 +98,9 @@ export default function AIChatbot() {
     return null;
   });
   const [isLoading, setIsLoading] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -97,22 +108,48 @@ export default function AIChatbot() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isOpen]);
+  }, [messages, isOpen, isExpanded]);
 
-  // Load guest session and history on mount
+  // Sync messages to local storage
+  useEffect(() => {
+    if (messages.length > 1) {
+      localStorage.setItem("indhulya_chat_messages", JSON.stringify(messages));
+    }
+  }, [messages]);
+
+  // Auto-focus input when opened
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 150);
+    }
+  }, [isOpen]);
+
+  // Escape key to close
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+        setIsExpanded(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Load guest session and history from backend if available
   useEffect(() => {
     const storedSessionId = localStorage.getItem("indhulya_chat_session_id");
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     
     if (storedSessionId) {
-      // Session ID already initialized in useState, avoiding synchronous setState in effect
       fetch(`${backendUrl}/chat/sessions/${storedSessionId}`)
         .then((res) => {
           if (res.ok) return res.json();
           throw new Error("Session not found");
         })
         .then((data) => {
-          if (data.messages && data.messages.length > 0) {
+          // Only overwrite local storage if backend has MORE messages (to prevent reverting on fast reload)
+          if (data.messages && data.messages.length > messages.length) {
             const formatted = data.messages.map((m: { id?: number; content: string; role: string }) => ({
               id: m.id || Math.floor(Math.random() * 1000000),
               text: m.content,
@@ -122,18 +159,17 @@ export default function AIChatbot() {
           }
         })
         .catch((err) => {
-          console.info("Guest session expired or not found on server, starting fresh:", err.message);
+          console.info("Guest session expired or not found on server, starting fresh backend session:", err.message);
           localStorage.removeItem("indhulya_chat_session_id");
           setSessionId(null);
         });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const submitMessage = async (userText: string) => {
     setIsLoading(true);
 
-    // Add user message
-    // eslint-disable-next-line react-hooks/purity
     const newUserMsg: Message = { id: Date.now(), text: userText, sender: "user" };
     setMessages((prev) => [...prev, newUserMsg]);
 
@@ -157,15 +193,12 @@ export default function AIChatbot() {
 
       const data = await response.json();
 
-      // Store the session ID returned by the backend
       if (data.session_id) {
         setSessionId(data.session_id);
         localStorage.setItem("indhulya_chat_session_id", data.session_id);
       }
 
-      // Add bot reply
       const botResponse: Message = { 
-        // eslint-disable-next-line react-hooks/purity
         id: Date.now() + 1, 
         text: data.response, 
         sender: "bot" 
@@ -174,7 +207,6 @@ export default function AIChatbot() {
     } catch (error) {
       console.error("Failed to send message:", error);
       const errorMsg: Message = {
-        // eslint-disable-next-line react-hooks/purity
         id: Date.now() + 1,
         text: "I'm having trouble connecting to our server right now. Please try again in a moment.",
         sender: "bot"
@@ -182,6 +214,7 @@ export default function AIChatbot() {
       setMessages((prev) => [...prev, errorMsg]);
     } finally {
       setIsLoading(false);
+      setTimeout(() => inputRef.current?.focus(), 10);
     }
   };
 
@@ -201,17 +234,38 @@ export default function AIChatbot() {
 
   return (
     <>
+      {/* Blurred Backdrop for Expanded View */}
+      <AnimatePresence>
+        {isOpen && isExpanded && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              setIsOpen(false);
+              setIsExpanded(false);
+            }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90]"
+          />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {isOpen && (
           <motion.div 
+            layout
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 w-80 md:w-96 bg-white rounded-2xl shadow-2xl overflow-hidden z-[100] border border-gray-100 flex flex-col h-[500px] max-h-[80vh]"
+            className={`fixed z-[100] bg-white shadow-2xl overflow-hidden border border-gray-100 flex flex-col transition-all duration-300 ease-in-out ${
+              isExpanded 
+                ? "inset-4 md:inset-10 md:max-w-4xl md:mx-auto rounded-3xl h-[auto] max-h-none" 
+                : "bottom-24 right-6 w-80 md:w-96 h-[500px] max-h-[80vh] rounded-2xl"
+            }`}
           >
             {/* Header */}
-            <div className="bg-[#5C1218] p-4 flex justify-between items-center text-white">
+            <div className="bg-[#5C1218] p-4 flex justify-between items-center text-white flex-shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-[#E5B94E]" />
@@ -223,16 +277,29 @@ export default function AIChatbot() {
                   </p>
                 </div>
               </div>
-              <button 
-                onClick={() => setIsOpen(false)}
-                className="hover:bg-white/20 p-1.5 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="hover:bg-white/20 p-1.5 rounded-full transition-colors hidden md:block"
+                  title={isExpanded ? "Minimize" : "Expand"}
+                >
+                  {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsOpen(false);
+                    setIsExpanded(false);
+                  }}
+                  className="hover:bg-white/20 p-1.5 rounded-full transition-colors"
+                  title="Close (Esc)"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAF9F6] scroll-smooth" data-lenis-prevent>
+            <div className={`flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-[#FAF9F6] scroll-smooth ${isExpanded ? "text-base" : "text-sm"}`} data-lenis-prevent>
               {messages.map((msg) => (
                 <motion.div 
                   initial={{ opacity: 0, y: 12, scale: 0.97 }}
@@ -243,13 +310,13 @@ export default function AIChatbot() {
                 >
                   {/* Bot Avatar */}
                   {msg.sender === "bot" && (
-                    <div className="w-7 h-7 rounded-full bg-[#5C1218] text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5">
-                      <Sparkles className="w-3.5 h-3.5 text-[#E5B94E]" />
+                    <div className={`rounded-full bg-[#5C1218] text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 ${isExpanded ? "w-8 h-8" : "w-7 h-7"}`}>
+                      <Sparkles className={`text-[#E5B94E] ${isExpanded ? "w-4 h-4" : "w-3.5 h-3.5"}`} />
                     </div>
                   )}
 
                   <div 
-                    className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                    className={`max-w-[75%] rounded-2xl px-4 py-2.5 leading-relaxed ${
                       msg.sender === "user" 
                         ? "bg-gradient-to-br from-[#5C1218] to-[#7c1c24] text-white rounded-tr-none shadow-sm" 
                         : "bg-white border border-gray-100 text-gray-800 rounded-tl-none shadow-sm"
@@ -263,11 +330,11 @@ export default function AIChatbot() {
               {/* Typing Indicator */}
               {isLoading && (
                 <div className="flex gap-2.5 items-start justify-start">
-                  <div className="w-7 h-7 rounded-full bg-[#5C1218] text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 animate-pulse">
-                    <Sparkles className="w-3.5 h-3.5 text-[#E5B94E]" />
+                  <div className={`rounded-full bg-[#5C1218] text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 animate-pulse ${isExpanded ? "w-8 h-8" : "w-7 h-7"}`}>
+                    <Sparkles className={`text-[#E5B94E] ${isExpanded ? "w-4 h-4" : "w-3.5 h-3.5"}`} />
                   </div>
-                  <div className="bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-none px-4 py-3 text-sm shadow-sm flex items-center gap-2">
-                    <span className="text-xs text-gray-400">Typing</span>
+                  <div className="bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-2">
+                    <span className="text-gray-400">Typing</span>
                     <span className="flex gap-1">
                       <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping" />
                       <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping [animation-delay:0.2s]" />
@@ -281,13 +348,13 @@ export default function AIChatbot() {
 
             {/* Quick Suggestions */}
             {messages.length <= 2 && (
-              <div className="px-4 py-2 bg-[#FAF9F6] border-t border-gray-100/50 flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth" data-lenis-prevent>
+              <div className={`px-4 bg-[#FAF9F6] border-t border-gray-100/50 flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth ${isExpanded ? "py-3" : "py-2"}`} data-lenis-prevent>
                 {SUGGESTIONS.map((s, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => handleSuggestionClick(s.query)}
-                    className="flex-shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full bg-white border border-gray-200 text-[#5C1218] hover:bg-gray-50 hover:border-[#E5B94E] transition-colors shadow-xs cursor-pointer"
+                    className="flex-shrink-0 text-[11px] md:text-xs font-semibold px-3 py-1.5 rounded-full bg-white border border-gray-200 text-[#5C1218] hover:bg-gray-50 hover:border-[#E5B94E] transition-colors shadow-xs cursor-pointer"
                   >
                     {s.label}
                   </button>
@@ -296,22 +363,23 @@ export default function AIChatbot() {
             )}
 
             {/* Input Area */}
-            <div className="p-4 bg-white border-t border-gray-100">
+            <div className={`p-4 bg-white border-t border-gray-100 flex-shrink-0 ${isExpanded ? "md:p-6" : ""}`}>
               <form onSubmit={handleSendMessage} className="flex gap-2">
                 <input 
+                  ref={inputRef}
                   type="text" 
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   disabled={isLoading}
                   placeholder={isLoading ? "Thinking..." : "Ask about our collections..."} 
-                  className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#5C1218] transition-shadow disabled:opacity-75"
+                  className={`flex-1 bg-gray-100 rounded-full px-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#5C1218] transition-shadow disabled:opacity-75 ${isExpanded ? "py-3 text-base" : "py-2"}`}
                 />
                 <button 
                   type="submit"
                   disabled={!inputValue.trim() || isLoading}
-                  className="w-10 h-10 rounded-full bg-[#E5B94E] text-[#5C1218] flex items-center justify-center hover:bg-[#d4a944] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                  className={`rounded-full bg-[#E5B94E] text-[#5C1218] flex items-center justify-center hover:bg-[#d4a944] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 ${isExpanded ? "w-12 h-12" : "w-10 h-10"}`}
                 >
-                  <Send className="w-4 h-4 ml-0.5" />
+                  <Send className={`${isExpanded ? "w-5 h-5" : "w-4 h-4"} ml-0.5`} />
                 </button>
               </form>
               <div className="text-center mt-2">
@@ -323,14 +391,21 @@ export default function AIChatbot() {
       </AnimatePresence>
 
       {/* Floating Action Button */}
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-[#5C1218] text-white rounded-full shadow-xl flex items-center justify-center z-50 hover:bg-[#70161E] transition-colors border-2 border-[#E5B94E]"
-      >
-        {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
-      </motion.button>
+      <AnimatePresence>
+        {!isExpanded && (
+          <motion.button
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsOpen(!isOpen)}
+            className="fixed bottom-6 right-6 w-14 h-14 bg-[#5C1218] text-white rounded-full shadow-xl flex items-center justify-center z-[110] hover:bg-[#70161E] transition-colors border-2 border-[#E5B94E]"
+          >
+            {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+          </motion.button>
+        )}
+      </AnimatePresence>
     </>
   );
 }
