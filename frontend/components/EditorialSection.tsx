@@ -96,9 +96,30 @@ export default function EditorialSection() {
             </motion.div>
             <div className="w-full md:w-1/2 flex flex-col items-start justify-center text-left">
               <h2 className="text-4xl md:text-5xl font-serif mb-6 text-black">The Indhulya Story</h2>
-              <p className="text-gray-600 mb-8 leading-relaxed max-w-lg">
-                Indhulya brings you authentic South Indian heritage jewelry. Specializing in One Gram Gold, exquisite Temple designs, and intricate Antique Nakshi work, we offer timeless elegance without the price tag of solid gold.
-              </p>
+              <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-50px" }}
+                variants={{
+                  visible: { transition: { staggerChildren: 0.04 } },
+                  hidden: {}
+                }}
+                className="text-gray-600 mb-8 leading-relaxed max-w-lg"
+              >
+                {"Indhulya brings you authentic South Indian heritage jewelry. Specializing in One Gram Gold, exquisite Temple designs, and intricate Antique Nakshi work, we offer timeless elegance without the price tag of solid gold.".split(" ").map((word, idx) => (
+                  <motion.span 
+                    key={idx}
+                    variants={{
+                      hidden: { opacity: 0, filter: "blur(10px)", y: 10 },
+                      visible: { opacity: 1, filter: "blur(0px)", y: 0 }
+                    }}
+                    transition={{ duration: 0.5 }}
+                    className="inline-block mr-1"
+                  >
+                    {word}
+                  </motion.span>
+                ))}
+              </motion.div>
               <button 
                 onClick={() => alert("Loading Indhulya Story...")}
                 className="border border-black text-black px-8 py-3 text-sm font-bold tracking-widest uppercase hover:bg-black hover:text-white transition-colors"
