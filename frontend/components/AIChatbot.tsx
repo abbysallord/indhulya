@@ -380,7 +380,6 @@ export default function AIChatbot() {
       <AnimatePresence>
         {!isOpen && (
           <motion.button
-            layoutId="chat-widget"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
