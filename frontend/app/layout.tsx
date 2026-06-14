@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: 'INDHULYA | Pristine Luxury',
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "INDHULYA | Pristine Luxury",
     description: "Discover Indhulya's exquisite collection of one gram gold, heritage, and temple jewellery. Experience pristine luxury with our handcrafted, affordable demi-fine jewelry designed for everyday elegance.",
-    images: ['/og-image.jpg'],
+    images: ['/og-image.png'],
   },
 };
 
