@@ -110,21 +110,18 @@ export default function AIChatbot() {
     scrollToBottom();
   }, [messages, isOpen, isExpanded]);
 
-  // Sync messages to local storage
   useEffect(() => {
     if (messages.length > 1) {
       localStorage.setItem("indhulya_chat_messages", JSON.stringify(messages));
     }
   }, [messages]);
 
-  // Auto-focus input when opened
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 150);
     }
-  }, [isOpen]);
+  }, [isOpen, isExpanded]); // Focus when opening OR toggling expand
 
-  // Escape key to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -136,7 +133,6 @@ export default function AIChatbot() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Load guest session and history from backend if available
   useEffect(() => {
     const storedSessionId = localStorage.getItem("indhulya_chat_session_id");
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -148,7 +144,6 @@ export default function AIChatbot() {
           throw new Error("Session not found");
         })
         .then((data) => {
-          // Only overwrite local storage if backend has MORE messages (to prevent reverting on fast reload)
           if (data.messages && data.messages.length > messages.length) {
             const formatted = data.messages.map((m: { id?: number; content: string; role: string }) => ({
               id: m.id || Math.floor(Math.random() * 1000000),
@@ -178,19 +173,11 @@ export default function AIChatbot() {
     try {
       const response = await fetch(`${backendUrl}/chat`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: userText,
-          session_id: sessionId
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userText, session_id: sessionId })
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to get response");
-      }
-
+      if (!response.ok) throw new Error("Failed to get response");
       const data = await response.json();
 
       if (data.session_id) {
@@ -198,14 +185,9 @@ export default function AIChatbot() {
         localStorage.setItem("indhulya_chat_session_id", data.session_id);
       }
 
-      const botResponse: Message = { 
-        id: Date.now() + 1, 
-        text: data.response, 
-        sender: "bot" 
-      };
+      const botResponse: Message = { id: Date.now() + 1, text: data.response, sender: "bot" };
       setMessages((prev) => [...prev, botResponse]);
     } catch (error) {
-      console.error("Failed to send message:", error);
       const errorMsg: Message = {
         id: Date.now() + 1,
         text: "I'm having trouble connecting to our server right now. Please try again in a moment.",
@@ -221,7 +203,6 @@ export default function AIChatbot() {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
-
     const userText = inputValue;
     setInputValue("");
     submitMessage(userText);
@@ -232,177 +213,182 @@ export default function AIChatbot() {
     submitMessage(query);
   };
 
+  // Extract chat content to avoid duplication across layout transitions
+  const ChatContent = ({ expanded }: { expanded: boolean }) => (
+    <>
+      {/* Header */}
+      <div className="bg-[#5C1218] p-4 flex justify-between items-center text-white flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-[#E5B94E]" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm">Indhulya AI</h3>
+            <p className="text-[10px] text-[#E5B94E] flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400"></span> Online
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <button 
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="hover:bg-white/20 p-1.5 rounded-full transition-colors hidden md:block"
+            title={expanded ? "Minimize" : "Expand"}
+          >
+            {expanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+          <button 
+            onClick={() => { setIsOpen(false); setIsExpanded(false); }}
+            className="hover:bg-white/20 p-1.5 rounded-full transition-colors"
+            title="Close (Esc)"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Chat Area */}
+      <div className={`flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-[#FAF9F6] scroll-smooth ${expanded ? "text-base" : "text-sm"}`} data-lenis-prevent>
+        {messages.map((msg) => (
+          <motion.div 
+            initial={{ opacity: 0, y: 12, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 28 }}
+            key={msg.id} 
+            className={`flex gap-2.5 items-start ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+          >
+            {msg.sender === "bot" && (
+              <div className={`rounded-full bg-[#5C1218] text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 ${expanded ? "w-8 h-8" : "w-7 h-7"}`}>
+                <Sparkles className={`text-[#E5B94E] ${expanded ? "w-4 h-4" : "w-3.5 h-3.5"}`} />
+              </div>
+            )}
+            <div 
+              className={`max-w-[75%] rounded-2xl px-4 py-2.5 leading-relaxed ${
+                msg.sender === "user" 
+                  ? "bg-gradient-to-br from-[#5C1218] to-[#7c1c24] text-white rounded-tr-none shadow-sm" 
+                  : "bg-white border border-gray-100 text-gray-800 rounded-tl-none shadow-sm"
+              }`}
+            >
+              {formatMessage(msg.text)}
+            </div>
+          </motion.div>
+        ))}
+
+        {isLoading && (
+          <div className="flex gap-2.5 items-start justify-start">
+            <div className={`rounded-full bg-[#5C1218] text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 animate-pulse ${expanded ? "w-8 h-8" : "w-7 h-7"}`}>
+              <Sparkles className={`text-[#E5B94E] ${expanded ? "w-4 h-4" : "w-3.5 h-3.5"}`} />
+            </div>
+            <div className="bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-2">
+              <span className="text-gray-400">Typing</span>
+              <span className="flex gap-1">
+                <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping" />
+                <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping [animation-delay:0.2s]" />
+                <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping [animation-delay:0.4s]" />
+              </span>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Quick Suggestions */}
+      {messages.length <= 2 && (
+        <div className={`px-4 bg-[#FAF9F6] border-t border-gray-100/50 flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth ${expanded ? "py-3" : "py-2"}`} data-lenis-prevent>
+          {SUGGESTIONS.map((s, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => handleSuggestionClick(s.query)}
+              className="flex-shrink-0 text-[11px] md:text-xs font-semibold px-3 py-1.5 rounded-full bg-white border border-gray-200 text-[#5C1218] hover:bg-gray-50 hover:border-[#E5B94E] transition-colors shadow-xs cursor-pointer"
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Input Area */}
+      <div className={`p-4 bg-white border-t border-gray-100 flex-shrink-0 ${expanded ? "md:p-6" : ""}`}>
+        <form onSubmit={handleSendMessage} className="flex gap-2">
+          <input 
+            ref={inputRef}
+            type="text" 
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            disabled={isLoading}
+            placeholder={isLoading ? "Thinking..." : "Ask about our collections..."} 
+            className={`flex-1 bg-gray-100 rounded-full px-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#5C1218] transition-shadow disabled:opacity-75 ${expanded ? "py-3 text-base" : "py-2"}`}
+          />
+          <button 
+            type="submit"
+            disabled={!inputValue.trim() || isLoading}
+            className={`rounded-full bg-[#E5B94E] text-[#5C1218] flex items-center justify-center hover:bg-[#d4a944] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 ${expanded ? "w-12 h-12" : "w-10 h-10"}`}
+          >
+            <Send className={`${expanded ? "w-5 h-5" : "w-4 h-4"} ml-0.5`} />
+          </button>
+        </form>
+        <div className="text-center mt-2">
+          <span className="text-[9px] text-gray-400 uppercase tracking-widest">Powered by AI</span>
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <>
-      {/* Blurred Backdrop for Expanded View */}
       <AnimatePresence>
-        {isOpen && isExpanded && (
+        {/* Minimized Floating Window */}
+        {isOpen && !isExpanded && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => {
-              setIsOpen(false);
-              setIsExpanded(false);
-            }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90]"
-          />
+            layoutId="chat-widget"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+            className="fixed bottom-24 right-6 w-80 md:w-96 h-[500px] max-h-[80vh] bg-white rounded-2xl shadow-2xl overflow-hidden z-[100] border border-gray-100 flex flex-col"
+          >
+            <ChatContent expanded={false} />
+          </motion.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
-        {isOpen && (
-          <motion.div 
-            layout
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className={`fixed z-[100] bg-white shadow-2xl overflow-hidden border border-gray-100 flex flex-col transition-all duration-300 ease-in-out ${
-              isExpanded 
-                ? "inset-4 md:inset-10 md:max-w-4xl md:mx-auto rounded-3xl h-[auto] max-h-none" 
-                : "bottom-24 right-6 w-80 md:w-96 h-[500px] max-h-[80vh] rounded-2xl"
-            }`}
-          >
-            {/* Header */}
-            <div className="bg-[#5C1218] p-4 flex justify-between items-center text-white flex-shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-[#E5B94E]" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm">Indhulya AI</h3>
-                  <p className="text-[10px] text-[#E5B94E] flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-400"></span> Online
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <button 
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="hover:bg-white/20 p-1.5 rounded-full transition-colors hidden md:block"
-                  title={isExpanded ? "Minimize" : "Expand"}
-                >
-                  {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                </button>
-                <button 
-                  onClick={() => {
-                    setIsOpen(false);
-                    setIsExpanded(false);
-                  }}
-                  className="hover:bg-white/20 p-1.5 rounded-full transition-colors"
-                  title="Close (Esc)"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Chat Area */}
-            <div className={`flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-[#FAF9F6] scroll-smooth ${isExpanded ? "text-base" : "text-sm"}`} data-lenis-prevent>
-              {messages.map((msg) => (
-                <motion.div 
-                  initial={{ opacity: 0, y: 12, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 28 }}
-                  key={msg.id} 
-                  className={`flex gap-2.5 items-start ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  {/* Bot Avatar */}
-                  {msg.sender === "bot" && (
-                    <div className={`rounded-full bg-[#5C1218] text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 ${isExpanded ? "w-8 h-8" : "w-7 h-7"}`}>
-                      <Sparkles className={`text-[#E5B94E] ${isExpanded ? "w-4 h-4" : "w-3.5 h-3.5"}`} />
-                    </div>
-                  )}
-
-                  <div 
-                    className={`max-w-[75%] rounded-2xl px-4 py-2.5 leading-relaxed ${
-                      msg.sender === "user" 
-                        ? "bg-gradient-to-br from-[#5C1218] to-[#7c1c24] text-white rounded-tr-none shadow-sm" 
-                        : "bg-white border border-gray-100 text-gray-800 rounded-tl-none shadow-sm"
-                    }`}
-                  >
-                    {formatMessage(msg.text)}
-                  </div>
-                </motion.div>
-              ))}
-
-              {/* Typing Indicator */}
-              {isLoading && (
-                <div className="flex gap-2.5 items-start justify-start">
-                  <div className={`rounded-full bg-[#5C1218] text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 animate-pulse ${isExpanded ? "w-8 h-8" : "w-7 h-7"}`}>
-                    <Sparkles className={`text-[#E5B94E] ${isExpanded ? "w-4 h-4" : "w-3.5 h-3.5"}`} />
-                  </div>
-                  <div className="bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-2">
-                    <span className="text-gray-400">Typing</span>
-                    <span className="flex gap-1">
-                      <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping" />
-                      <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping [animation-delay:0.2s]" />
-                      <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping [animation-delay:0.4s]" />
-                    </span>
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Quick Suggestions */}
-            {messages.length <= 2 && (
-              <div className={`px-4 bg-[#FAF9F6] border-t border-gray-100/50 flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth ${isExpanded ? "py-3" : "py-2"}`} data-lenis-prevent>
-                {SUGGESTIONS.map((s, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => handleSuggestionClick(s.query)}
-                    className="flex-shrink-0 text-[11px] md:text-xs font-semibold px-3 py-1.5 rounded-full bg-white border border-gray-200 text-[#5C1218] hover:bg-gray-50 hover:border-[#E5B94E] transition-colors shadow-xs cursor-pointer"
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Input Area */}
-            <div className={`p-4 bg-white border-t border-gray-100 flex-shrink-0 ${isExpanded ? "md:p-6" : ""}`}>
-              <form onSubmit={handleSendMessage} className="flex gap-2">
-                <input 
-                  ref={inputRef}
-                  type="text" 
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  disabled={isLoading}
-                  placeholder={isLoading ? "Thinking..." : "Ask about our collections..."} 
-                  className={`flex-1 bg-gray-100 rounded-full px-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#5C1218] transition-shadow disabled:opacity-75 ${isExpanded ? "py-3 text-base" : "py-2"}`}
-                />
-                <button 
-                  type="submit"
-                  disabled={!inputValue.trim() || isLoading}
-                  className={`rounded-full bg-[#E5B94E] text-[#5C1218] flex items-center justify-center hover:bg-[#d4a944] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 ${isExpanded ? "w-12 h-12" : "w-10 h-10"}`}
-                >
-                  <Send className={`${isExpanded ? "w-5 h-5" : "w-4 h-4"} ml-0.5`} />
-                </button>
-              </form>
-              <div className="text-center mt-2">
-                <span className="text-[9px] text-gray-400 uppercase tracking-widest">Powered by AI</span>
-              </div>
-            </div>
-          </motion.div>
+        {/* Expanded Modal Window */}
+        {isOpen && isExpanded && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={() => setIsExpanded(false)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            
+            <motion.div 
+              layoutId="chat-widget"
+              className="w-full max-w-4xl h-[85vh] bg-white rounded-3xl overflow-hidden relative shadow-2xl z-10 flex flex-col"
+            >
+              <ChatContent expanded={true} />
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
       {/* Floating Action Button */}
       <AnimatePresence>
-        {!isExpanded && (
+        {!isOpen && (
           <motion.button
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => setIsOpen(true)}
             className="fixed bottom-6 right-6 w-14 h-14 bg-[#5C1218] text-white rounded-full shadow-xl flex items-center justify-center z-[110] hover:bg-[#70161E] transition-colors border-2 border-[#E5B94E]"
           >
-            {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+            <MessageCircle className="w-6 h-6" />
           </motion.button>
         )}
       </AnimatePresence>
