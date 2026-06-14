@@ -18,7 +18,6 @@ const topStylesProducts = [
     price: 900,
     originalPrice: 1000,
     image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=400&h=500&fit=crop",
-    hoverImage: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=400&h=500&fit=crop",
     badge: "BESTSELLER",
   },
   {
@@ -27,7 +26,6 @@ const topStylesProducts = [
     price: 850,
     originalPrice: 950,
     image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=400&h=500&fit=crop",
-    hoverImage: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&h=500&fit=crop",
   },
   {
     id: "3",
@@ -35,7 +33,6 @@ const topStylesProducts = [
     price: 999,
     originalPrice: 1100,
     image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&h=500&fit=crop",
-    hoverImage: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=400&h=500&fit=crop",
     badge: "NEW",
   },
   {
@@ -44,7 +41,6 @@ const topStylesProducts = [
     price: 3200,
     originalPrice: 3600,
     image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=400&h=500&fit=crop",
-    hoverImage: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&h=500&fit=crop",
   },
 ];
 
@@ -55,7 +51,6 @@ const fineGoldProducts = [
     price: 2800,
     originalPrice: 3200,
     image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=400&h=500&fit=crop",
-    hoverImage: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=400&h=500&fit=crop",
     badge: "ONE GRAM GOLD",
   },
   {
@@ -64,7 +59,6 @@ const fineGoldProducts = [
     price: 3500,
     originalPrice: 4000,
     image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=400&h=500&fit=crop",
-    hoverImage: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&h=500&fit=crop",
   },
   {
     id: "7",
@@ -72,7 +66,6 @@ const fineGoldProducts = [
     price: 850,
     originalPrice: 950,
     image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&h=500&fit=crop",
-    hoverImage: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=400&h=500&fit=crop",
     badge: "HERITAGE",
   },
   {
@@ -81,7 +74,6 @@ const fineGoldProducts = [
     price: 999,
     originalPrice: 1200,
     image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=400&h=500&fit=crop",
-    hoverImage: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&h=500&fit=crop",
   },
 ];
 

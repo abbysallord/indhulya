@@ -10,7 +10,7 @@ type Product = {
   price: number;
   originalPrice?: number;
   image: string;
-  hoverImage: string;
+  hoverImage?: string;
   badge?: string;
 };
 
@@ -43,14 +43,16 @@ function ProductCardItem({ product }: { product: Product }) {
           src={product.image}
           alt={product.name}
           fill
-          className="object-cover group-hover:opacity-0 transition-opacity duration-500"
+          className={`object-cover transition-all duration-700 ${product.hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-110'}`}
         />
-        <Image
-          src={product.hoverImage}
-          alt={`${product.name} hover`}
-          fill
-          className="object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 absolute inset-0"
-        />
+        {product.hoverImage && (
+          <Image
+            src={product.hoverImage}
+            alt={`${product.name} hover`}
+            fill
+            className="object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 absolute inset-0"
+          />
+        )}
         {/* Badge */}
         {product.badge && (
           <div className="absolute top-2 left-2 bg-black text-white text-[10px] font-bold uppercase px-2 py-1 tracking-wider z-10 shadow-sm">
