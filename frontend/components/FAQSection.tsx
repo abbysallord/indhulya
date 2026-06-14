@@ -76,23 +76,37 @@ export default function FAQSection() {
                   <span className={`font-medium md:text-lg transition-colors ${isOpen ? "text-[#5C1218]" : "text-gray-900"}`}>
                     {faq.question}
                   </span>
-                  <div className={`flex-shrink-0 ml-4 p-2 rounded-full transition-colors ${isOpen ? "bg-[#5C1218] text-white" : "bg-gray-100 text-gray-500"}`}>
-                    {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  <div className={`flex-shrink-0 ml-4 p-2 rounded-full transition-colors duration-300 ${isOpen ? "bg-[#5C1218] text-white" : "bg-gray-100 text-gray-500"}`}>
+                    <motion.div
+                      animate={{ rotate: isOpen ? 180 : 0 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    >
+                      {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    </motion.div>
                   </div>
                 </button>
                 
-                <AnimatePresence>
+                <AnimatePresence initial={false}>
                   {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    <motion.section
+                      initial="collapsed"
+                      animate="open"
+                      exit="collapsed"
+                      variants={{
+                        open: { opacity: 1, height: "auto" },
+                        collapsed: { opacity: 0, height: 0 }
+                      }}
+                      transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                      className="overflow-hidden"
                     >
-                      <div className="p-6 md:px-8 pt-2 pb-6 text-gray-600 leading-relaxed bg-white/30 backdrop-blur-sm rounded-b-2xl border-x border-b border-white shadow-sm -mt-4 pt-8">
+                      <motion.div 
+                        variants={{ collapsed: { y: -10 }, open: { y: 0 } }}
+                        transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                        className="p-6 md:px-8 pt-2 pb-6 text-gray-600 leading-relaxed bg-white/30 backdrop-blur-sm rounded-b-2xl border-x border-b border-white shadow-sm -mt-4 pt-8"
+                      >
                         {faq.answer}
-                      </div>
-                    </motion.div>
+                      </motion.div>
+                    </motion.section>
                   )}
                 </AnimatePresence>
               </motion.div>
