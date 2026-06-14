@@ -13,8 +13,25 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "INDHULYA | Demifine Jewellery | 18k thick Gold Plated - Shop Now",
-  description: "Shop for demifine jewellery pieces for your everyday use from INDHULYA. Bracelets, necklaces, rings, earrings, mangalsutras and much more. waterproof, tarnishproof and hypoallergenic jewellery. Affordable luxury jewellery for everyday.",
+  metadataBase: new URL('https://indhulya.com'),
+  title: {
+    default: "INDHULYA | Pristine Luxury | One Gram Gold & Temple Jewellery",
+    template: "%s | INDHULYA"
+  },
+  description: "Discover Indhulya's exquisite collection of one gram gold, heritage, and temple jewellery. Experience pristine luxury with our handcrafted, affordable demi-fine jewelry designed for everyday elegance.",
+  openGraph: {
+    title: "INDHULYA | Pristine Luxury | One Gram Gold & Temple Jewellery",
+    description: "Discover Indhulya's exquisite collection of one gram gold, heritage, and temple jewellery. Experience pristine luxury with our handcrafted, affordable demi-fine jewelry designed for everyday elegance.",
+    url: 'https://indhulya.com',
+    siteName: 'Indhulya',
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "INDHULYA | Pristine Luxury",
+    description: "Discover Indhulya's exquisite collection of one gram gold, heritage, and temple jewellery. Experience pristine luxury with our handcrafted, affordable demi-fine jewelry designed for everyday elegance.",
+  },
 };
 
 import SmoothScroll from "@/components/SmoothScroll";
@@ -31,6 +48,19 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col font-sans text-black bg-[#F7F7F7]" suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Indhulya",
+              url: "https://indhulya.com",
+              logo: "https://indhulya.com/Indhulya_logo.avif",
+              description: "Pristine Luxury. One Gram Gold & Temple Jewellery for everyday elegance.",
+            }),
+          }}
+        />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

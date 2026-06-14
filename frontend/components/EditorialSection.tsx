@@ -19,7 +19,7 @@ export default function EditorialSection() {
 
   const handlePlayClick = () => {
     if (typeof window !== "undefined" && window.innerWidth < 768) {
-      window.open("https://www.youtube.com/watch?v=Ym0hZG-zNOk", "_blank");
+      window.open("https://youtu.be/6_J9GMgcIEE", "_blank");
     } else {
       setIsVideoOpen(true);
     }
@@ -134,7 +134,7 @@ export default function EditorialSection() {
               <iframe 
                 width="100%" 
                 height="100%" 
-                src="https://www.youtube.com/embed/Ym0hZG-zNOk?autoplay=1&mute=1" 
+                src="https://www.youtube.com/embed/6_J9GMgcIEE?autoplay=1" 
                 title="Indhulya Jewelry Showcase" 
                 frameBorder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
