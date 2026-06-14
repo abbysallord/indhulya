@@ -9,7 +9,6 @@ import CardSlider from "@/components/CardSlider";
 import EditorialSection from "@/components/EditorialSection";
 import FAQSection from "@/components/FAQSection";
 import ContactSection from "@/components/ContactSection";
-import AIChatbot from "@/components/AIChatbot";
 import FlashyShowcase from "@/components/FlashyShowcase";
 import Footer from "@/components/Footer";
 
@@ -131,7 +130,6 @@ export default function Home() {
       </main>
 
       <Footer />
-      <AIChatbot />
     </div>
   );
 }

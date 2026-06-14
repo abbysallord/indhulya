@@ -58,8 +58,8 @@ export default function ProductsPage() {
           </motion.p>
         </div>
 
-        {/* Filters and Controls - Sticky Glass Dock */}
-        <div className="sticky top-28 z-40 bg-white/60 backdrop-blur-md rounded-2xl border border-white shadow-[0_8px_32px_rgba(0,0,0,0.05)] p-4 flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+        {/* Filters and Controls */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6 border-b border-gray-200 pb-8">
           
           <div className="flex flex-wrap items-center gap-2 md:gap-4 justify-center md:justify-start">
             {CATEGORIES.map((cat, idx) => (
@@ -68,7 +68,7 @@ export default function ProductsPage() {
                 className={`px-6 py-2 rounded-full text-xs font-semibold tracking-widest uppercase transition-all duration-300 ${
                   idx === 0 
                   ? "bg-[#5C1218] text-white border-transparent shadow-md" 
-                  : "bg-white/50 text-gray-600 border border-white/50 shadow-sm hover:border-[#5C1218] hover:text-[#5C1218]"
+                  : "bg-transparent text-gray-600 border border-gray-200 hover:border-[#5C1218] hover:text-[#5C1218]"
                 }`}
               >
                 {cat}

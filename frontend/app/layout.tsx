@@ -47,6 +47,7 @@ export const metadata: Metadata = {
 };
 
 import SmoothScroll from "@/components/SmoothScroll";
+import AIChatbot from "@/components/AIChatbot";
 
 export default function RootLayout({
   children,
@@ -74,6 +75,7 @@ export default function RootLayout({
           }}
         />
         <SmoothScroll>{children}</SmoothScroll>
+        <AIChatbot />
       </body>
     </html>
   );

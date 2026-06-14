@@ -1,25 +1,14 @@
 "use client";
 import { Mail, Phone, MapPin } from "lucide-react";
-import Image from "next/image";
 
 export default function ContactSection() {
   return (
-    <section className="relative w-full py-20"> 
-      {/* Background Image */}
-      <Image 
-        src="https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=2000&auto=format&fit=crop"
-        alt="Bridal Jewelry"
-        fill
-        className="object-cover opacity-90"
-      />
-      {/* Gradient overlay to ensure text readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/80 to-white/40" />
-
-      <div className="relative max-w-[1440px] mx-auto px-4 md:px-8 z-10">
-        <div className="flex flex-col md:flex-row gap-8 md:gap-12">
+    <section className="w-full py-20 bg-[#FAF9F6]"> {/* Ivory Background */}
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8">
+        <div className="flex flex-col md:flex-row gap-16 md:gap-24">
           
           {/* Left Column: Contact Info */}
-          <div className="w-full md:w-5/12 flex flex-col justify-center bg-white/70 backdrop-blur-2xl border border-white p-8 md:p-12 shadow-[0_8px_32px_rgba(0,0,0,0.1)] rounded-3xl">
+          <div className="w-full md:w-5/12 flex flex-col justify-center">
             <h2 className="text-4xl md:text-5xl font-serif mb-6 text-[#5C1218]">Get in Touch</h2> {/* Deep Maroon/Aubergine */}
             <p className="text-gray-700 mb-10 leading-relaxed text-sm md:text-base">
               Whether you are looking for the perfect bridal set or have questions about our Temple Jewelry collection, our experts are here to guide you.
@@ -59,7 +48,7 @@ export default function ContactSection() {
           </div>
 
           {/* Right Column: Inquiry Form */}
-          <div className="w-full md:w-7/12 bg-white/70 backdrop-blur-2xl border border-white p-8 md:p-12 shadow-[0_8px_32px_rgba(0,0,0,0.1)] rounded-3xl">
+          <div className="w-full md:w-7/12 bg-white p-8 md:p-12 shadow-xl">
             <h3 className="text-2xl font-serif text-black mb-8">Send an Inquiry</h3>
             <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('Message sent successfully!'); }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
