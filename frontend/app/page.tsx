@@ -7,6 +7,7 @@ import ProductGrid from "@/components/ProductGrid";
 import PromoBanner from "@/components/PromoBanner";
 import CardSlider from "@/components/CardSlider";
 import EditorialSection from "@/components/EditorialSection";
+import FAQSection from "@/components/FAQSection";
 import ContactSection from "@/components/ContactSection";
 import AIChatbot from "@/components/AIChatbot";
 import FlashyShowcase from "@/components/FlashyShowcase";
@@ -125,6 +126,7 @@ export default function Home() {
         <FlashyShowcase />
         <div id="occasions"><CardSlider title="For Every Occasion" cards={occasionCards} aspectRatio="square" /></div>
         <div id="editorial"><EditorialSection /></div>
+        <div id="faq"><FAQSection /></div>
         <div id="contact"><ContactSection /></div>
       </main>
 
