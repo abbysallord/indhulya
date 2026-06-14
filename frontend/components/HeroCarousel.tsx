@@ -1,8 +1,8 @@
 "use client";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 
 const slides = [
   {
@@ -35,106 +35,164 @@ const slides = [
   },
 ];
 
+const extendedSlides = [slides[slides.length - 1], ...slides, slides[0]];
+
 export default function HeroCarousel() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(1);
+  const [isTransitioning, setIsTransitioning] = useState(true);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+  const nextSlide = useCallback(() => {
+    setIsTransitioning((prev) => (!prev ? true : prev));
+    setCurrentSlide((prev) => prev + 1);
+  }, []);
+
+  const prevSlide = useCallback(() => {
+    setIsTransitioning((prev) => (!prev ? true : prev));
+    setCurrentSlide((prev) => prev - 1);
+  }, []);
+
+  const handleTransitionEnd = () => {
+    if (currentSlide === 0) {
+      setIsTransitioning(false);
+      setCurrentSlide(slides.length);
+    } else if (currentSlide === extendedSlides.length - 1) {
+      setIsTransitioning(false);
+      setCurrentSlide(1);
+    }
   };
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-  };
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+    const timer = setInterval(() => {
+      nextSlide();
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [isAutoPlaying, currentSlide, nextSlide]);
 
   return (
     <div className="relative w-full h-[70vh] min-h-[500px] overflow-hidden bg-[#FAF9F6]">
       <div
-        className="absolute inset-0 flex transition-transform duration-700 ease-[cubic-bezier(0.87,0,0.13,1)]"
-        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        className="absolute inset-0 flex"
+        style={{
+          transform: `translateX(-${currentSlide * 100}%)`,
+          transition: isTransitioning ? "transform 700ms cubic-bezier(0.87,0,0.13,1)" : "none",
+        }}
+        onTransitionEnd={handleTransitionEnd}
       >
-        {slides.map((slide, index) => (
-          <div key={slide.id} className="w-full h-full flex-shrink-0 flex flex-col md:flex-row">
-            <div className="w-full md:w-1/2 h-full relative">
-              <Image
-                src={slide.image}
-                alt="Indhulya Jewelry Collection"
-                fill
-                className="object-cover object-center"
-                priority
-              />
-            </div>
-            <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center text-center p-8 bg-[#FAF9F6]">
-              <motion.h2
-                initial="hidden"
-                animate={currentSlide === index ? "visible" : "hidden"}
-                variants={{
-                  visible: { transition: { staggerChildren: 0.08 } },
-                  hidden: { transition: { staggerChildren: 0.02, staggerDirection: -1 } }
-                }}
-                className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#5C1218] mb-4 tracking-wide"
-              >
-                {slide.title.split("").map((char, idx) => (
-                  <motion.span
-                    key={idx}
-                    variants={{
-                      hidden: { opacity: 0, filter: "blur(10px)", y: 20 },
-                      visible: { opacity: 1, filter: "blur(0px)", y: 0 }
-                    }}
-                    transition={{ duration: 0.6 }}
-                    className="inline-block"
-                  >
-                    {char}
-                  </motion.span>
-                ))}
-                <br />
-                <motion.span
+        {extendedSlides.map((slide, index) => {
+          // Logic to keep text visible during the invisible snap
+          const isVisible =
+            currentSlide === index ||
+            (index === 1 && currentSlide === extendedSlides.length - 1) ||
+            (index === slides.length && currentSlide === 0);
+
+          return (
+            <div key={`${slide.id}-${index}`} className="w-full h-full flex-shrink-0 flex flex-col md:flex-row">
+              <div className="w-full md:w-1/2 h-full relative">
+                <Image
+                  src={slide.image}
+                  alt="Indhulya Jewelry Collection"
+                  fill
+                  className="object-cover object-center"
+                  priority={index === 1}
+                />
+              </div>
+              <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center text-center p-8 bg-[#FAF9F6]">
+                <motion.h2
+                  initial="hidden"
+                  animate={isVisible ? "visible" : "hidden"}
                   variants={{
-                    hidden: { opacity: 0, y: 10 },
-                    visible: { opacity: 1, y: 0 }
+                    visible: { transition: { staggerChildren: 0.08 } },
+                    hidden: { transition: { staggerChildren: 0.02, staggerDirection: -1 } },
                   }}
-                  transition={{ delay: currentSlide === index ? 0.6 : 0, duration: 0.8 }}
-                  className="italic text-gray-800"
+                  className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#5C1218] mb-4 tracking-wide"
                 >
-                  {slide.subtitle}
-                </motion.span>
-              </motion.h2>
-              <p className="text-gray-700 text-sm md:text-base tracking-widest uppercase mb-8">
-                {slide.description}
-              </p>
-              <button
-                onClick={() => alert(`Navigating to ${slide.title} collection...`)}
-                className="border-b-2 border-black text-black font-semibold text-sm tracking-widest uppercase pb-1 hover:text-gray-600 hover:border-gray-600 transition-colors"
-              >
-                Shop Now
-              </button>
+                  {slide.title.split("").map((char, idx) => (
+                    <motion.span
+                      key={idx}
+                      variants={{
+                        hidden: { opacity: 0, filter: "blur(10px)", y: 20 },
+                        visible: { opacity: 1, filter: "blur(0px)", y: 0 },
+                      }}
+                      transition={{ duration: 0.6 }}
+                      className="inline-block"
+                    >
+                      {char}
+                    </motion.span>
+                  ))}
+                  <br />
+                  <motion.span
+                    variants={{
+                      hidden: { opacity: 0, y: 10 },
+                      visible: { opacity: 1, y: 0 },
+                    }}
+                    transition={{ delay: isVisible ? 0.6 : 0, duration: 0.8 }}
+                    className="italic text-gray-800"
+                  >
+                    {slide.subtitle}
+                  </motion.span>
+                </motion.h2>
+                <p className="text-gray-700 text-sm md:text-base tracking-widest uppercase mb-8">
+                  {slide.description}
+                </p>
+                <button
+                  onClick={() => alert(`Navigating to ${slide.title} collection...`)}
+                  className="border-b-2 border-black text-black font-semibold text-sm tracking-widest uppercase pb-1 hover:text-gray-600 hover:border-gray-600 transition-colors"
+                >
+                  Shop Now
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Controls */}
       <button
-        onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 text-black transition-colors z-10"
+        onClick={() => {
+          setIsAutoPlaying(false);
+          prevSlide();
+        }}
+        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 text-black transition-colors z-10 backdrop-blur-sm"
       >
         <ChevronLeft className="w-6 h-6" />
       </button>
       <button
-        onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 text-black transition-colors z-10"
+        onClick={() => {
+          setIsAutoPlaying(false);
+          nextSlide();
+        }}
+        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 text-black transition-colors z-10 backdrop-blur-sm"
       >
         <ChevronRight className="w-6 h-6" />
       </button>
 
-      {/* Dots */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-        {slides.map((_, index) => (
-          <div
-            key={index}
-            className={`w-2 h-2 rounded-full cursor-pointer ${currentSlide === index ? 'bg-black' : 'bg-black/30'}`}
-            onClick={() => setCurrentSlide(index)}
-          ></div>
-        ))}
+      {/* Dots and Play/Pause */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-6 z-10 bg-white/50 backdrop-blur-md px-6 py-3 rounded-full shadow-sm">
+        <button
+          onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+          className="text-black hover:text-[#5C1218] transition-colors"
+          title={isAutoPlaying ? "Pause Auto-play" : "Start Auto-play"}
+        >
+          {isAutoPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
+        </button>
+        <div className="flex gap-2">
+          {slides.map((_, index) => {
+            const activeIndex = currentSlide === 0 ? slides.length - 1 : currentSlide === extendedSlides.length - 1 ? 0 : currentSlide - 1;
+            return (
+              <div
+                key={index}
+                className={`w-2 h-2 rounded-full cursor-pointer transition-all duration-300 ${activeIndex === index ? "bg-[#5C1218] w-4" : "bg-black/30"}`}
+                onClick={() => {
+                  setIsAutoPlaying(false);
+                  if (!isTransitioning) setIsTransitioning(true);
+                  setCurrentSlide(index + 1);
+                }}
+              ></div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
