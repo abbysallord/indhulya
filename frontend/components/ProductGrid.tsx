@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
@@ -62,34 +62,46 @@ function ProductCardItem({ product, priority }: { product: Product; priority?: b
           </div>
         )}
         
+        {/* Hover Actions - Standardized with Products Page */}
+        <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors duration-300 z-10 pointer-events-none" />
+        
         {/* Wishlist Button */}
-        <motion.button 
-          whileTap={{ scale: 0.8 }}
-          animate={isWishlisted ? { scale: [1, 1.2, 1] } : {}}
-          transition={{ duration: 0.3 }}
-          onClick={handleWishlist}
-          className={`absolute top-2 right-2 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 ${
-            isWishlisted ? 'opacity-100' : ''
-          }`}
-        >
-          <Heart 
-            className={`w-4 h-4 transition-colors duration-300 ${
-              isWishlisted ? 'fill-[#5C1218] text-[#5C1218]' : 'text-gray-600 hover:text-black'
-            }`} 
-          />
-        </motion.button>
+        <div className="absolute top-4 right-4 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 z-20">
+          <motion.button 
+            whileTap={{ scale: 0.8 }}
+            animate={isWishlisted ? { scale: [1, 1.2, 1] } : {}}
+            transition={{ duration: 0.3 }}
+            onClick={handleWishlist}
+            className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:text-[#5C1218] transition-colors"
+          >
+            <Heart 
+              className={`w-4 h-4 transition-colors duration-300 ${
+                isWishlisted ? 'fill-[#5C1218] text-[#5C1218]' : ''
+              }`} 
+            />
+          </motion.button>
+        </div>
 
         {/* Add to Bag Button */}
-        <button 
-          onClick={handleAdd}
-          className={`absolute bottom-0 left-0 w-full py-3 text-xs font-bold tracking-widest uppercase transition-all duration-300 z-10 ${
-            isAdded 
-              ? 'translate-y-0 bg-[#2b4c3b] text-[#E5B94E]' 
-              : 'translate-y-full group-hover:translate-y-0 bg-black text-white hover:bg-[#5C1218]'
-          }`}
-        >
-          {isAdded ? "ADDED ✓" : "ADD TO BAG"}
-        </button>
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
+          <button 
+            onClick={handleAdd}
+            className={`w-full py-3 backdrop-blur-sm font-semibold text-xs tracking-widest uppercase rounded-lg shadow-lg transition-colors flex items-center justify-center gap-2 ${
+              isAdded
+                ? 'bg-[#2b4c3b] text-[#E5B94E]'
+                : 'bg-white/95 text-black hover:bg-[#5C1218] hover:text-white'
+            }`}
+          >
+            {isAdded ? (
+              "ADDED ✓"
+            ) : (
+              <>
+                <ShoppingBag className="w-4 h-4" />
+                Add to Cart
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Product Info */}

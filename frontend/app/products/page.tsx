@@ -1,9 +1,10 @@
 "use client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, Heart, ShoppingBag } from "lucide-react";
+import { Search, SlidersHorizontal, Heart, ShoppingBag, ArrowLeft } from "lucide-react";
 
 // Using unique Unsplash IDs for a rich catalog feel
 const ALL_PRODUCTS = [
@@ -30,6 +31,14 @@ export default function ProductsPage() {
       
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 md:px-8 py-8 md:py-16 pt-32">
         
+        {/* Back Navigation */}
+        <div className="mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 text-gray-500 hover:text-[#5C1218] transition-colors text-sm font-semibold tracking-wide uppercase">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
+          </Link>
+        </div>
+
         {/* Page Header */}
         <div className="flex flex-col items-center justify-center text-center mb-16">
           <motion.h1 
@@ -99,6 +108,7 @@ export default function ProductsPage() {
                   src={product.image}
                   alt={product.name}
                   fill
+                  priority={idx <= 3}
                   className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
