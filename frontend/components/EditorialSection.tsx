@@ -36,6 +36,7 @@ export default function EditorialSection() {
                 src="https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=1000&auto=format&fit=crop"
                 alt="Editorial Image"
                 fill
+                priority={true}
                 className="object-cover"
                sizes="(max-width: 768px) 100vw, 50vw" />
             </div>
