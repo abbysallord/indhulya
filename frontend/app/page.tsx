@@ -9,6 +9,7 @@ import CardSlider from "@/components/CardSlider";
 import EditorialSection from "@/components/EditorialSection";
 import ContactSection from "@/components/ContactSection";
 import AIChatbot from "@/components/AIChatbot";
+import FlashyShowcase from "@/components/FlashyShowcase";
 import Footer from "@/components/Footer";
 
 const topStylesProducts = [
@@ -121,6 +122,7 @@ export default function Home() {
         <PromoBanner />
         <div id="shop-by-recipient"><CardSlider title="Shop By Recipient" cards={recipientCards} /></div>
         <div id="one-gram-gold"><ProductGrid title="One Gram Gold Collection" products={fineGoldProducts} viewAllLink="#" /></div>
+        <FlashyShowcase />
         <div id="occasions"><CardSlider title="For Every Occasion" cards={occasionCards} aspectRatio="square" /></div>
         <div id="editorial"><EditorialSection /></div>
         <div id="contact"><ContactSection /></div>
