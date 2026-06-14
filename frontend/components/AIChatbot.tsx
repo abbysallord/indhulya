@@ -346,7 +346,8 @@ export default function AIChatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 350, damping: 30 }}
-            className="fixed bottom-24 right-6 w-80 md:w-96 h-[500px] max-h-[80vh] bg-white rounded-2xl shadow-2xl overflow-hidden z-[100] border border-gray-100 flex flex-col"
+            style={{ borderRadius: "1rem" }}
+            className="fixed bottom-24 right-6 w-80 md:w-96 h-[500px] max-h-[80vh] bg-white shadow-2xl overflow-hidden z-[100] border border-gray-100 flex flex-col"
           >
             {renderChatContent(false)}
           </motion.div>
@@ -376,7 +377,8 @@ export default function AIChatbot() {
                 borderRadius: "100%"
               }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="w-full max-w-4xl h-[85vh] bg-white rounded-3xl overflow-hidden relative shadow-2xl z-10 flex flex-col origin-center"
+              style={{ borderRadius: "1.5rem" }}
+              className="w-full max-w-4xl h-[85vh] bg-white overflow-hidden relative shadow-2xl z-10 flex flex-col origin-center"
             >
               {renderChatContent(true)}
             </motion.div>
