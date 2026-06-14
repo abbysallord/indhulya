@@ -41,6 +41,9 @@ export const metadata: Metadata = {
     description: "Discover Indhulya's exquisite collection of one gram gold, heritage, and temple jewellery. Experience pristine luxury with our handcrafted, affordable demi-fine jewelry designed for everyday elegance.",
     images: ['/og-image.png'],
   },
+  other: {
+    "og:logo": "https://indhulya.vercel.app/icon.png"
+  }
 };
 
 import SmoothScroll from "@/components/SmoothScroll";

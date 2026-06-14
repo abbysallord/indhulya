@@ -2,7 +2,6 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
 
 type Message = {
   id: number;
@@ -83,7 +82,12 @@ export default function AIChatbot() {
     { id: 1, text: "Welcome to Indhulya! How can I help you find the perfect piece of jewelry today?", sender: "bot" }
   ]);
   const [inputValue, setInputValue] = useState("");
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("indhulya_chat_session_id");
+    }
+    return null;
+  });
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -101,7 +105,7 @@ export default function AIChatbot() {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     
     if (storedSessionId) {
-      setSessionId(storedSessionId);
+      // Session ID already initialized in useState, avoiding synchronous setState in effect
       fetch(`${backendUrl}/chat/sessions/${storedSessionId}`)
         .then((res) => {
           if (res.ok) return res.json();
@@ -109,8 +113,8 @@ export default function AIChatbot() {
         })
         .then((data) => {
           if (data.messages && data.messages.length > 0) {
-            const formatted = data.messages.map((m: any) => ({
-              id: m.id || Date.now(),
+            const formatted = data.messages.map((m: { id?: number; content: string; role: string }) => ({
+              id: m.id || Math.floor(Math.random() * 1000000),
               text: m.content,
               sender: m.role === "user" ? "user" : "bot" as "user" | "bot"
             }));
@@ -129,6 +133,7 @@ export default function AIChatbot() {
     setIsLoading(true);
 
     // Add user message
+    // eslint-disable-next-line react-hooks/purity
     const newUserMsg: Message = { id: Date.now(), text: userText, sender: "user" };
     setMessages((prev) => [...prev, newUserMsg]);
 
@@ -160,6 +165,7 @@ export default function AIChatbot() {
 
       // Add bot reply
       const botResponse: Message = { 
+        // eslint-disable-next-line react-hooks/purity
         id: Date.now() + 1, 
         text: data.response, 
         sender: "bot" 
@@ -168,6 +174,7 @@ export default function AIChatbot() {
     } catch (error) {
       console.error("Failed to send message:", error);
       const errorMsg: Message = {
+        // eslint-disable-next-line react-hooks/purity
         id: Date.now() + 1,
         text: "I'm having trouble connecting to our server right now. Please try again in a moment.",
         sender: "bot"
