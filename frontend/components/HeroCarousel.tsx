@@ -178,6 +178,7 @@ export default function HeroCarousel() {
           prevSlide();
         }}
         className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 text-black transition-colors z-10 backdrop-blur-sm"
+        aria-label="Previous Slide"
       >
         <ChevronLeft className="w-6 h-6" />
       </button>
@@ -187,6 +188,7 @@ export default function HeroCarousel() {
           nextSlide();
         }}
         className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 text-black transition-colors z-10 backdrop-blur-sm"
+        aria-label="Next Slide"
       >
         <ChevronRight className="w-6 h-6" />
       </button>
@@ -197,6 +199,7 @@ export default function HeroCarousel() {
           onClick={() => setIsAutoPlaying(!isAutoPlaying)}
           className="text-black hover:text-[#5C1218] transition-colors"
           title={isAutoPlaying ? "Pause Auto-play" : "Start Auto-play"}
+          aria-label={isAutoPlaying ? "Pause Auto-play" : "Start Auto-play"}
         >
           {isAutoPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
         </button>

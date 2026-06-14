@@ -237,6 +237,7 @@ export default function AIChatbot() {
             onClick={() => setIsExpanded(!isExpanded)}
             className="hover:bg-white/20 p-1.5 rounded-full transition-colors hidden md:block"
             title={expanded ? "Minimize" : "Expand"}
+            aria-label={expanded ? "Minimize" : "Expand"}
           >
             {expanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
@@ -244,6 +245,7 @@ export default function AIChatbot() {
             onClick={() => { setIsOpen(false); setIsExpanded(false); }}
             className="hover:bg-white/20 p-1.5 rounded-full transition-colors"
             title="Close (Esc)"
+            aria-label="Close Chat"
           >
             <X className="w-5 h-5" />
           </button>
@@ -325,6 +327,7 @@ export default function AIChatbot() {
             type="submit"
             disabled={!inputValue.trim() || isLoading}
             className={`rounded-full bg-[#E5B94E] text-[#5C1218] flex items-center justify-center hover:bg-[#d4a944] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 ${expanded ? "w-12 h-12" : "w-10 h-10"}`}
+            aria-label="Send Message"
           >
             <Send className={`${expanded ? "w-5 h-5" : "w-4 h-4"} ml-0.5`} />
           </button>
@@ -399,6 +402,7 @@ export default function AIChatbot() {
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
             className="fixed bottom-6 right-6 w-14 h-14 bg-[#5C1218] text-white rounded-full shadow-xl flex items-center justify-center z-[110] hover:bg-[#70161E] transition-colors border-2 border-[#E5B94E] outline-none"
+            aria-label="Open Chat"
           >
             <MessageCircle className="w-6 h-6" />
           </motion.button>

@@ -20,7 +20,7 @@ export default function ContactSection() {
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-1 tracking-wider uppercase text-xs">Flagship Store</h4>
+                  <h3 className="font-semibold text-gray-900 mb-1 tracking-wider uppercase text-xs">Flagship Store</h3>
                   <p className="text-gray-600 text-sm">Road No. 36, Jubilee Hills<br/>Hyderabad, Telangana 500033</p>
                 </div>
               </div>
@@ -30,8 +30,8 @@ export default function ContactSection() {
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-1 tracking-wider uppercase text-xs">Phone</h4>
-                  <p className="text-gray-600 text-sm">+91 98765 43210<br/><span className="text-xs text-gray-400">Mon-Sat, 10am to 8pm</span></p>
+                  <h3 className="font-semibold text-gray-900 mb-1 tracking-wider uppercase text-xs">Phone</h3>
+                  <p className="text-gray-600 text-sm">+91 98765 43210<br/><span className="text-xs text-gray-600">Mon-Sat, 10am to 8pm</span></p>
                 </div>
               </div>
 
@@ -40,7 +40,7 @@ export default function ContactSection() {
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-1 tracking-wider uppercase text-xs">Email</h4>
+                  <h3 className="font-semibold text-gray-900 mb-1 tracking-wider uppercase text-xs">Email</h3>
                   <p className="text-gray-600 text-sm">concierge@indhulya.com</p>
                 </div>
               </div>
@@ -53,29 +53,29 @@ export default function ContactSection() {
             <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('Message sent successfully!'); }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">First Name *</label>
-                  <input type="text" required className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
+                  <label htmlFor="firstName" className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">First Name *</label>
+                  <input id="firstName" type="text" required className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Last Name</label>
-                  <input type="text" className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
+                  <label htmlFor="lastName" className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Last Name</label>
+                  <input id="lastName" type="text" className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Email Address *</label>
-                  <input type="email" required className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
+                  <label htmlFor="emailAddress" className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Email Address *</label>
+                  <input id="emailAddress" type="email" required className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Phone Number</label>
-                  <input type="tel" className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
+                  <label htmlFor="phoneNumber" className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Phone Number</label>
+                  <input id="phoneNumber" type="tel" className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Message *</label>
-                <textarea required rows={4} className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent resize-none"></textarea>
+                <label htmlFor="message" className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Message *</label>
+                <textarea id="message" required rows={4} className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent resize-none"></textarea>
               </div>
 
               <div className="flex items-center gap-3 py-2">

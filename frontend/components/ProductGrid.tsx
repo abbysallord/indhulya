@@ -73,6 +73,7 @@ function ProductCardItem({ product, priority }: { product: Product; priority?: b
             transition={{ duration: 0.3 }}
             onClick={handleWishlist}
             className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:text-[#5C1218] transition-colors"
+            aria-label="Toggle Wishlist"
           >
             <Heart 
               className={`w-4 h-4 transition-colors duration-300 ${

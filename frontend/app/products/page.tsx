@@ -85,7 +85,7 @@ export default function ProductsPage() {
               />
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <button className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors">
+            <button className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors" aria-label="Filter products">
               <SlidersHorizontal className="w-4 h-4 text-gray-600" />
             </button>
           </div>
@@ -116,12 +116,12 @@ export default function ProductsPage() {
                 {/* Hover Actions */}
                 <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors duration-300" />
                 <div className="absolute top-4 right-4 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                  <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:text-[#5C1218] transition-colors">
+                  <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:text-[#5C1218] transition-colors" aria-label="Toggle Wishlist">
                     <Heart className="w-4 h-4" />
                   </button>
                 </div>
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                  <button className="w-full py-3 bg-white/95 backdrop-blur-sm text-black font-semibold text-xs tracking-widest uppercase rounded-lg shadow-lg hover:bg-[#5C1218] hover:text-white transition-colors flex items-center justify-center gap-2">
+                  <button className="w-full py-3 bg-white/95 backdrop-blur-sm text-black font-semibold text-xs tracking-widest uppercase rounded-lg shadow-lg hover:bg-[#5C1218] hover:text-white transition-colors flex items-center justify-center gap-2" aria-label="Add to Cart">
                     <ShoppingBag className="w-4 h-4" />
                     Add to Cart
                   </button>

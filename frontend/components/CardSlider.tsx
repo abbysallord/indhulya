@@ -41,12 +41,14 @@ export default function CardSlider({ title, cards, aspectRatio = "portrait" }: C
           <button 
             onClick={scrollLeft}
             className="p-2 border border-black rounded-full hover:bg-black hover:text-white transition-colors"
+            aria-label="Scroll Left"
           >
             <ChevronRight className="w-5 h-5 rotate-180" />
           </button>
           <button 
             onClick={scrollRight}
             className="p-2 border border-black rounded-full hover:bg-black hover:text-white transition-colors"
+            aria-label="Scroll Right"
           >
             <ChevronRight className="w-5 h-5" />
           </button>

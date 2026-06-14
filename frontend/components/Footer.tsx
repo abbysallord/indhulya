@@ -10,12 +10,14 @@ export default function Footer() {
               Join our heritage family to receive updates on authentic South Indian arrivals and exclusive bridal offers.
             </p>
             <div className="flex w-full border-b border-gray-600 pb-2">
+              <label htmlFor="newsletter-email" className="sr-only">Email address</label>
               <input 
+                id="newsletter-email"
                 type="email" 
                 placeholder="Email address" 
-                className="bg-transparent border-none outline-none text-sm w-full text-white placeholder-gray-500"
+                className="bg-transparent border-none outline-none text-sm w-full text-white placeholder-gray-400"
               />
-              <button className="text-xs font-bold tracking-widest uppercase hover:text-gray-300">
+              <button className="text-xs font-bold tracking-widest uppercase hover:text-gray-300 text-white" aria-label="Subscribe to newsletter">
                 SUBSCRIBE
               </button>
             </div>
@@ -29,8 +31,8 @@ export default function Footer() {
 
           {/* Column 2: Shop */}
           <div className="flex flex-col gap-4">
-            <h3 className="text-sm font-bold tracking-widest uppercase mb-2">Shop</h3>
-            <ul className="flex flex-col gap-3 text-sm text-gray-400">
+            <h3 className="text-sm font-bold tracking-widest uppercase mb-2 text-white">Shop</h3>
+            <ul className="flex flex-col gap-3 text-sm text-gray-300">
               <li className="hover:text-white cursor-pointer">Necklaces</li>
               <li className="hover:text-white cursor-pointer">Earrings</li>
               <li className="hover:text-white cursor-pointer">Bracelets</li>
@@ -42,8 +44,8 @@ export default function Footer() {
 
           {/* Column 3: Information */}
           <div className="flex flex-col gap-4">
-            <h3 className="text-sm font-bold tracking-widest uppercase mb-2">Information</h3>
-            <ul className="flex flex-col gap-3 text-sm text-gray-400">
+            <h3 className="text-sm font-bold tracking-widest uppercase mb-2 text-white">Information</h3>
+            <ul className="flex flex-col gap-3 text-sm text-gray-300">
               <li className="hover:text-white cursor-pointer">About Us</li>
               <li className="hover:text-white cursor-pointer">Contact Us</li>
               <li className="hover:text-white cursor-pointer">Store Locator</li>
@@ -55,8 +57,8 @@ export default function Footer() {
 
           {/* Column 4: Legal */}
           <div className="flex flex-col gap-4">
-            <h3 className="text-sm font-bold tracking-widest uppercase mb-2">Legal</h3>
-            <ul className="flex flex-col gap-3 text-sm text-gray-400">
+            <h3 className="text-sm font-bold tracking-widest uppercase mb-2 text-white">Legal</h3>
+            <ul className="flex flex-col gap-3 text-sm text-gray-300">
               <li className="hover:text-white cursor-pointer">Privacy Policy</li>
               <li className="hover:text-white cursor-pointer">Terms of Service</li>
               <li className="hover:text-white cursor-pointer">Shipping Policy</li>
@@ -66,7 +68,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-800 text-xs text-gray-500 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-700 text-xs text-gray-300 gap-4">
           <p>© {new Date().getFullYear()} INDHULYA. All Rights Reserved.</p>
           <div className="flex items-center gap-2">
             <span>Secured Checkout</span>

@@ -18,6 +18,7 @@ export default function Header() {
         <div className="flex-1 flex items-center text-xs font-semibold relative">
           <button 
             className="md:hidden mr-4 text-gray-700 hover:text-black"
+            aria-label="Toggle mobile menu"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -86,17 +87,17 @@ export default function Header() {
               </div>
             )}
           </div>
-          <button className="md:hidden text-gray-700 hover:text-black">
+          <button className="md:hidden text-gray-700 hover:text-black" aria-label="Search">
              <Search className="w-5 h-5" />
           </button>
-          <button onClick={() => alert("Opening Store Locator...")} className="hidden sm:block text-gray-700 hover:text-black">
+          <button onClick={() => alert("Opening Store Locator...")} className="hidden sm:block text-gray-700 hover:text-black" aria-label="Store Locator">
             <MapPin className="w-5 h-5" />
           </button>
-          <button onClick={() => alert("Opening Wishlist...")} className="relative text-gray-700 hover:text-black">
+          <button onClick={() => alert("Opening Wishlist...")} className="relative text-gray-700 hover:text-black" aria-label="Wishlist">
             <Heart className="w-5 h-5" />
             <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">0</span>
           </button>
-          <button onClick={() => alert("Opening Cart...")} className="relative text-gray-700 hover:text-black">
+          <button onClick={() => alert("Opening Cart...")} className="relative text-gray-700 hover:text-black" aria-label="Shopping Cart">
             <ShoppingBag className="w-5 h-5" />
             <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">0</span>
           </button>
