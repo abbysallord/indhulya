@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://indhulya.com';
+  const baseUrl = 'https://indhulya.vercel.app';
 
   // We map the core routes for Indhulya here. 
   // In the future, this can be dynamically mapped from a product database.

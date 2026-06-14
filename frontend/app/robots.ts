@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: '/private/',
     },
-    sitemap: 'https://indhulya.com/sitemap.xml',
+    sitemap: 'https://indhulya.vercel.app/sitemap.xml',
   };
 }
