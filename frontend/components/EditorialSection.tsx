@@ -37,7 +37,7 @@ export default function EditorialSection() {
                 alt="Editorial Image"
                 fill
                 className="object-cover"
-              />
+               sizes="(max-width: 768px) 100vw, 50vw" />
             </div>
             <div className="w-full md:w-1/2 flex flex-col items-start justify-center text-left">
               <h2 className="text-4xl md:text-5xl font-serif mb-6 text-black">Curated Heritage Picks</h2>
@@ -86,7 +86,7 @@ export default function EditorialSection() {
                 alt="The Indhulya Story"
                 fill
                 className="object-cover transition-transform duration-700 hover:scale-105"
-              />
+               sizes="(max-width: 768px) 100vw, 50vw" />
               <div className="absolute inset-0 flex items-center justify-center z-10">
                 <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors">
                   <div className="w-0 h-0 border-t-8 border-t-transparent border-l-12 border-l-black border-b-8 border-b-transparent ml-1"></div>

@@ -63,7 +63,7 @@ export default function CardSlider({ title, cards, aspectRatio = "portrait" }: C
                 alt={card.title}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-700"
-              />
+               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
             </div>
             <div className="flex flex-col items-center text-center">
               <h3 className="text-lg font-serif mb-1">{card.title}</h3>

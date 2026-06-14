@@ -23,7 +23,7 @@ export default function CategoryCircles() {
                     alt={cat.name}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                  />
+                   sizes="(max-width: 768px) 33vw, 15vw" />
                 </div>
               </div>
               <span className="text-xs font-semibold tracking-wider uppercase text-black group-hover:text-[#5C1218] transition-colors">{cat.name}</span>

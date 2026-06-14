@@ -12,7 +12,7 @@ export default function PromoBanner() {
             alt="Gift Combos Promo"
             fill
             className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
-          />
+           sizes="100vw" />
           <div className="absolute inset-0 bg-black/40" />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-8">
             <h2 className="text-sm md:text-base font-bold tracking-[0.2em] uppercase mb-4 text-[#E5B94E]">Specially Curated</h2>

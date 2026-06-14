@@ -44,14 +44,14 @@ function ProductCardItem({ product }: { product: Product }) {
           alt={product.name}
           fill
           className={`object-cover transition-all duration-700 ${product.hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-110'}`}
-        />
+         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" />
         {product.hoverImage && (
           <Image
             src={product.hoverImage}
             alt={`${product.name} hover`}
             fill
             className="object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 absolute inset-0"
-          />
+           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" />
         )}
         {/* Badge */}
         {product.badge && (
