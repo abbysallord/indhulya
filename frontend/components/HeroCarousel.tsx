@@ -95,8 +95,8 @@ export default function HeroCarousel() {
                   alt="Indhulya Jewelry Collection"
                   fill
                   className="object-cover object-center"
-                  priority={index === 1}
-                 sizes="100vw" />
+                  priority={index <= 1}
+                  sizes="(max-width: 768px) 100vw, 50vw" />
               </div>
               <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center text-center p-8 bg-[#FAF9F6]">
                 <motion.h2
