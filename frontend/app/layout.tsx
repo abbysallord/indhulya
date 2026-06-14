@@ -28,8 +28,9 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${playfair.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col font-sans text-black bg-[#F7F7F7]">
+      <body className="min-h-full flex flex-col font-sans text-black bg-[#F7F7F7]" suppressHydrationWarning>
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
