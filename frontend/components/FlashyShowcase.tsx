@@ -62,7 +62,7 @@ export default function FlashyShowcase() {
       */}
       <div className="relative flex overflow-hidden group py-12">
         {/* We use 3 sets to ensure it can fill ultra-wide monitors without a gap */}
-        <div className="animate-marquee group-hover:[animation-play-state:paused] flex whitespace-nowrap w-max">
+        <div className="animate-marquee flex whitespace-nowrap w-max">
           {[...showcaseImages, ...showcaseImages, ...showcaseImages].map((img, index) => (
             <div 
               key={`${img.id}-${index}`} 
@@ -80,9 +80,9 @@ export default function FlashyShowcase() {
               
               {/* Hover CTA inside card */}
               <div className="absolute inset-0 flex flex-col items-center justify-center z-20 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500">
-                <button className="px-6 py-3 bg-white/95 backdrop-blur-sm text-[#5C1218] text-[10px] md:text-xs font-bold tracking-widest uppercase rounded-full shadow-lg transform translate-y-4 group-hover/card:translate-y-0 transition-all duration-500 hover:bg-[#5C1218] hover:text-white">
+                <Link href="/products" className="px-6 py-3 bg-white/95 backdrop-blur-sm text-[#5C1218] text-[10px] md:text-xs font-bold tracking-widest uppercase rounded-full shadow-lg transform translate-y-4 group-hover/card:translate-y-0 transition-all duration-500 hover:bg-[#5C1218] hover:text-white">
                   Shop Collection
-                </button>
+                </Link>
               </div>
 
               {/* Title overlay at bottom */}
@@ -104,6 +104,9 @@ export default function FlashyShowcase() {
         }
         .animate-marquee {
           animation: marquee 40s linear infinite;
+        }
+        .group:hover .animate-marquee {
+          animation-play-state: paused !important;
         }
       `}} />
     </section>
