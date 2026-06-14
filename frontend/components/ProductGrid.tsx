@@ -20,7 +20,7 @@ type ProductGridProps = {
   viewAllLink?: string;
 };
 
-function ProductCardItem({ product }: { product: Product }) {
+function ProductCardItem({ product, priority }: { product: Product; priority?: boolean }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
 
@@ -44,6 +44,7 @@ function ProductCardItem({ product }: { product: Product }) {
           alt={product.name}
           fill
           className={`object-cover transition-all duration-700 ${product.hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-110'}`}
+          priority={priority}
          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" />
         {product.hoverImage && (
           <Image
@@ -51,6 +52,7 @@ function ProductCardItem({ product }: { product: Product }) {
             alt={`${product.name} hover`}
             fill
             className="object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 absolute inset-0"
+            priority={priority}
            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" />
         )}
         {/* Badge */}
@@ -117,8 +119,8 @@ export default function ProductGrid({ title, products, viewAllLink }: ProductGri
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        {products.map((product) => (
-          <ProductCardItem key={product.id} product={product} />
+        {products.map((product, index) => (
+          <ProductCardItem key={product.id} product={product} priority={index < 4} />
         ))}
       </div>
     </section>
