@@ -43,24 +43,38 @@ export default function HeroCarousel() {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   const nextSlide = useCallback(() => {
-    setIsTransitioning((prev) => (!prev ? true : prev));
-    setCurrentSlide((prev) => prev + 1);
+    setIsTransitioning(true);
+    setCurrentSlide((prev) => {
+      if (prev >= extendedSlides.length - 1) return prev;
+      return prev + 1;
+    });
   }, []);
 
   const prevSlide = useCallback(() => {
-    setIsTransitioning((prev) => (!prev ? true : prev));
-    setCurrentSlide((prev) => prev - 1);
+    setIsTransitioning(true);
+    setCurrentSlide((prev) => {
+      if (prev <= 0) return prev;
+      return prev - 1;
+    });
   }, []);
 
-  const handleTransitionEnd = () => {
-    if (currentSlide === 0) {
-      setIsTransitioning(false);
-      setCurrentSlide(slides.length);
-    } else if (currentSlide === extendedSlides.length - 1) {
-      setIsTransitioning(false);
-      setCurrentSlide(1);
+  // Robust transition reset that doesn't rely on flaky onTransitionEnd events
+  useEffect(() => {
+    if (currentSlide === extendedSlides.length - 1) {
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+        setCurrentSlide(1);
+      }, 750);
+      return () => clearTimeout(timer);
     }
-  };
+    if (currentSlide === 0) {
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+        setCurrentSlide(slides.length);
+      }, 750);
+      return () => clearTimeout(timer);
+    }
+  }, [currentSlide]);
 
   useEffect(() => {
     if (!isAutoPlaying) return;
@@ -68,7 +82,16 @@ export default function HeroCarousel() {
       nextSlide();
     }, 5000);
     return () => clearInterval(timer);
-  }, [isAutoPlaying, currentSlide, nextSlide]);
+  }, [isAutoPlaying, nextSlide]);
+
+  // Pause autoplay when tab is inactive to prevent background state drift
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) setIsAutoPlaying(false);
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
 
   return (
     <div className="relative w-full h-[70vh] min-h-[500px] overflow-hidden bg-[#FAF9F6]">
@@ -78,7 +101,6 @@ export default function HeroCarousel() {
           transform: `translateX(-${currentSlide * 100}%)`,
           transition: isTransitioning ? "transform 700ms cubic-bezier(0.87,0,0.13,1)" : "none",
         }}
-        onTransitionEnd={handleTransitionEnd}
       >
         {extendedSlides.map((slide, index) => {
           // Logic to keep text visible during the invisible snap
@@ -89,7 +111,7 @@ export default function HeroCarousel() {
 
           return (
             <div key={`${slide.id}-${index}`} className="w-full h-full flex-shrink-0 flex flex-col md:flex-row">
-              <div className="w-full md:w-1/2 h-full relative">
+              <div className="w-full h-[45%] md:h-full md:w-1/2 relative">
                 <Image
                   src={slide.image}
                   alt="Indhulya Jewelry Collection"
@@ -98,7 +120,7 @@ export default function HeroCarousel() {
                   priority={index <= 2}
                   sizes="(max-width: 768px) 100vw, 50vw" />
               </div>
-              <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center text-center p-8 bg-[#FAF9F6]">
+              <div className="w-full h-[55%] md:h-full md:w-1/2 flex flex-col items-center justify-center text-center px-4 pb-20 pt-6 md:p-8 bg-[#FAF9F6]">
                 <motion.h2
                   initial="hidden"
                   animate={isVisible ? "visible" : "hidden"}
