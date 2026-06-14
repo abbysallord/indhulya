@@ -368,7 +368,15 @@ export default function AIChatbot() {
             
             <motion.div 
               layoutId="chat-widget"
-              className="w-full max-w-4xl h-[85vh] bg-white rounded-3xl overflow-hidden relative shadow-2xl z-10 flex flex-col"
+              exit={{ 
+                opacity: 0, 
+                scale: 0.1, 
+                x: "calc(50vw - 3.25rem)", 
+                y: "calc(50vh - 3.25rem)",
+                borderRadius: "100%"
+              }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="w-full max-w-4xl h-[85vh] bg-white rounded-3xl overflow-hidden relative shadow-2xl z-10 flex flex-col origin-center"
             >
               {renderChatContent(true)}
             </motion.div>
