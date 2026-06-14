@@ -214,7 +214,7 @@ export default function AIChatbot() {
   };
 
   // Extract chat content to avoid duplication across layout transitions
-  const ChatContent = ({ expanded }: { expanded: boolean }) => (
+  const renderChatContent = (expanded: boolean) => (
     <>
       {/* Header */}
       <div className="bg-[#5C1218] p-4 flex justify-between items-center text-white flex-shrink-0">
@@ -348,7 +348,7 @@ export default function AIChatbot() {
             transition={{ type: "spring", stiffness: 350, damping: 30 }}
             className="fixed bottom-24 right-6 w-80 md:w-96 h-[500px] max-h-[80vh] bg-white rounded-2xl shadow-2xl overflow-hidden z-[100] border border-gray-100 flex flex-col"
           >
-            <ChatContent expanded={false} />
+            {renderChatContent(false)}
           </motion.div>
         )}
       </AnimatePresence>
@@ -370,7 +370,7 @@ export default function AIChatbot() {
               layoutId="chat-widget"
               className="w-full max-w-4xl h-[85vh] bg-white rounded-3xl overflow-hidden relative shadow-2xl z-10 flex flex-col"
             >
-              <ChatContent expanded={true} />
+              {renderChatContent(true)}
             </motion.div>
           </div>
         )}
@@ -380,13 +380,15 @@ export default function AIChatbot() {
       <AnimatePresence>
         {!isOpen && (
           <motion.button
+            layoutId="chat-widget"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
+            transition={{ type: "spring", stiffness: 350, damping: 30 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 w-14 h-14 bg-[#5C1218] text-white rounded-full shadow-xl flex items-center justify-center z-[110] hover:bg-[#70161E] transition-colors border-2 border-[#E5B94E]"
+            className="fixed bottom-6 right-6 w-14 h-14 bg-[#5C1218] text-white rounded-full shadow-xl flex items-center justify-center z-[110] hover:bg-[#70161E] transition-colors border-2 border-[#E5B94E] outline-none"
           >
             <MessageCircle className="w-6 h-6" />
           </motion.button>
