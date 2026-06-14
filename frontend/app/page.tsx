@@ -2,15 +2,17 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Header from "@/components/Header";
 import HeroCarousel from "@/components/HeroCarousel";
 import TrustTicker from "@/components/TrustTicker";
-import CategoryCircles from "@/components/CategoryCircles";
-import ProductGrid from "@/components/ProductGrid";
-import PromoBanner from "@/components/PromoBanner";
-import CardSlider from "@/components/CardSlider";
-import EditorialSection from "@/components/EditorialSection";
-import FAQSection from "@/components/FAQSection";
-import ContactSection from "@/components/ContactSection";
-import FlashyShowcase from "@/components/FlashyShowcase";
 import Footer from "@/components/Footer";
+import dynamic from "next/dynamic";
+
+const CategoryCircles = dynamic(() => import("@/components/CategoryCircles"));
+const ProductGrid = dynamic(() => import("@/components/ProductGrid"));
+const PromoBanner = dynamic(() => import("@/components/PromoBanner"));
+const CardSlider = dynamic(() => import("@/components/CardSlider"));
+const FlashyShowcase = dynamic(() => import("@/components/FlashyShowcase"));
+const EditorialSection = dynamic(() => import("@/components/EditorialSection"));
+const FAQSection = dynamic(() => import("@/components/FAQSection"));
+const ContactSection = dynamic(() => import("@/components/ContactSection"));
 
 const topStylesProducts = [
   {
