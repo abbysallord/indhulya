@@ -78,6 +78,8 @@ export default function Header() {
                   maxLength={6}
                   placeholder="6-digit Pincode"
                   className="w-full bg-black/5 border-none rounded px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-black transition-all"
+                  autoFocus
+                  defaultValue={deliveryLocation ? (deliveryLocation.match(/\((\d{6})\)/)?.[1] || "") : ""}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                        e.preventDefault();
