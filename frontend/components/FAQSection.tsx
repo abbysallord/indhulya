@@ -67,11 +67,11 @@ export default function FAQSection() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
                 key={index}
-                className="overflow-hidden bg-white/90 rounded-2xl border border-white shadow-sm transition-colors hover:bg-white"
+                className="overflow-hidden"
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full flex justify-between items-center p-6 md:px-8 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C1218] focus-visible:ring-offset-2"
+                  className="w-full flex justify-between items-center p-6 md:px-8 bg-white/90 rounded-2xl border border-white shadow-sm hover:bg-white transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C1218] focus-visible:ring-offset-2"
                 >
                   <span className={`font-medium md:text-lg transition-colors ${isOpen ? "text-[#5C1218]" : "text-gray-900"}`}>
                     {faq.question}
@@ -89,15 +89,23 @@ export default function FAQSection() {
                 <AnimatePresence initial={false}>
                   {isOpen && (
                     <motion.section
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      initial="collapsed"
+                      animate="open"
+                      exit="collapsed"
+                      variants={{
+                        open: { opacity: 1, height: "auto" },
+                        collapsed: { opacity: 0, height: 0 }
+                      }}
+                      transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
                       className="overflow-hidden"
                     >
-                      <div className="p-6 md:px-8 pt-0 text-gray-600 leading-relaxed">
+                      <motion.div 
+                        variants={{ collapsed: { y: -10 }, open: { y: 0 } }}
+                        transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                        className="p-6 md:px-8 pt-2 pb-6 text-gray-600 leading-relaxed bg-white/80 rounded-b-2xl border-x border-b border-white shadow-sm -mt-4 pt-8"
+                      >
                         {faq.answer}
-                      </div>
+                      </motion.div>
                     </motion.section>
                   )}
                 </AnimatePresence>
