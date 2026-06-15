@@ -41,6 +41,7 @@ export default function TrackOrderPage() {
                 id="orderId" 
                 type="text" 
                 required 
+                maxLength={20}
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
                 placeholder="e.g. IND-10045"
@@ -60,29 +61,42 @@ export default function TrackOrderPage() {
             <div className="mt-12 pt-12 border-t border-gray-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <h3 className="font-serif text-xl mb-6 text-center">Status for {orderId.toUpperCase()}</h3>
               
-              <div className="relative pl-6 border-l-2 border-[#5C1218] space-y-8 pb-4">
-                <div className="relative">
-                  <div className="absolute -left-[35px] bg-[#5C1218] rounded-full p-1 border-4 border-white">
-                    <CheckCircle className="w-4 h-4 text-white" />
-                  </div>
-                  <h4 className="font-semibold text-sm">Order Placed</h4>
-                  <p className="text-xs text-gray-500 mt-1">We have received your order.</p>
-                </div>
-                
-                <div className="relative">
-                  <div className="absolute -left-[35px] bg-[#5C1218] rounded-full p-1 border-4 border-white">
-                    <Package className="w-4 h-4 text-white" />
-                  </div>
-                  <h4 className="font-semibold text-sm">Processing & Packed</h4>
-                  <p className="text-xs text-gray-500 mt-1">Your item has been securely packed.</p>
-                </div>
+              <div className="relative pb-4">
+                {/* Background Line */}
+                <div className="absolute top-4 bottom-8 left-[15px] w-0.5 bg-gray-200"></div>
+                {/* Active Line */}
+                <div className="absolute top-4 bottom-[50%] left-[15px] w-0.5 bg-[#5C1218]"></div>
 
-                <div className="relative opacity-50">
-                  <div className="absolute -left-[35px] bg-gray-300 rounded-full p-1 border-4 border-white">
-                    <Truck className="w-4 h-4 text-white" />
+                <div className="space-y-8">
+                  <div className="relative flex items-start gap-4">
+                    <div className="relative z-10 bg-[#5C1218] rounded-full p-1 border-4 border-white shadow-sm">
+                      <CheckCircle className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="pt-1">
+                      <h4 className="font-semibold text-sm">Order Placed</h4>
+                      <p className="text-xs text-gray-500 mt-1">We have received your order.</p>
+                    </div>
                   </div>
-                  <h4 className="font-semibold text-sm">In Transit</h4>
-                  <p className="text-xs text-gray-500 mt-1">Awaiting pickup by courier partner.</p>
+                  
+                  <div className="relative flex items-start gap-4">
+                    <div className="relative z-10 bg-[#5C1218] rounded-full p-1 border-4 border-white shadow-sm">
+                      <Package className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="pt-1">
+                      <h4 className="font-semibold text-sm">Processing & Packed</h4>
+                      <p className="text-xs text-gray-500 mt-1">Your item has been securely packed.</p>
+                    </div>
+                  </div>
+
+                  <div className="relative flex items-start gap-4 opacity-50">
+                    <div className="relative z-10 bg-gray-300 rounded-full p-1 border-4 border-white shadow-sm">
+                      <Truck className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="pt-1">
+                      <h4 className="font-semibold text-sm">In Transit</h4>
+                      <p className="text-xs text-gray-500 mt-1">Awaiting pickup by courier partner.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
