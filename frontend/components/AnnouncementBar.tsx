@@ -20,7 +20,10 @@ export default function AnnouncementBar() {
         }
       });
     }, 1000);
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(t);
+    };
   }, []);
 
   const formatTime = (t: number) => t.toString().padStart(2, "0");
