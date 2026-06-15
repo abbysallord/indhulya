@@ -54,28 +54,28 @@ export default function ContactSection() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="firstName" className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">First Name *</label>
-                  <input id="firstName" type="text" required className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
+                  <input id="firstName" type="text" maxLength={50} required className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
                 </div>
                 <div>
                   <label htmlFor="lastName" className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Last Name</label>
-                  <input id="lastName" type="text" className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
+                  <input id="lastName" type="text" maxLength={50} className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="emailAddress" className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Email Address *</label>
-                  <input id="emailAddress" type="email" required className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
+                  <input id="emailAddress" type="email" maxLength={100} required className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
                 </div>
                 <div>
                   <label htmlFor="phoneNumber" className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Phone Number</label>
-                  <input id="phoneNumber" type="tel" className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
+                  <input id="phoneNumber" type="tel" maxLength={10} pattern="[0-9]{10}" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '').slice(0, 10); }} className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent" />
                 </div>
               </div>
 
               <div>
                 <label htmlFor="message" className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Message *</label>
-                <textarea id="message" required rows={4} className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent resize-none"></textarea>
+                <textarea id="message" required maxLength={500} rows={4} className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent resize-none"></textarea>
               </div>
 
               <div className="flex items-center gap-3 py-2">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, Heart, ShoppingBag, ArrowLeft } from "lucide-react";
+import { useState, useMemo } from "react";
 
 // Using unique Unsplash IDs for a rich catalog feel
 const ALL_PRODUCTS = [
@@ -25,6 +26,34 @@ const ALL_PRODUCTS = [
 const CATEGORIES = ["All", "Necklaces", "Earrings", "Bangles", "Chokers", "Bridal Sets"];
 
 export default function ProductsPage() {
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("default");
+
+  const filteredProducts = useMemo(() => {
+    let result = [...ALL_PRODUCTS];
+
+    if (selectedCategory !== "All") {
+      result = result.filter(p => p.category === selectedCategory);
+    }
+
+    if (searchQuery.trim() !== "") {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(p => 
+        p.name.toLowerCase().includes(q) || 
+        p.category.toLowerCase().includes(q)
+      );
+    }
+
+    if (sortBy === "price_asc") {
+      result.sort((a, b) => parseInt(a.price.replace(/\D/g,'')) - parseInt(b.price.replace(/\D/g,'')));
+    } else if (sortBy === "price_desc") {
+      result.sort((a, b) => parseInt(b.price.replace(/\D/g,'')) - parseInt(a.price.replace(/\D/g,'')));
+    }
+
+    return result;
+  }, [selectedCategory, searchQuery, sortBy]);
+
   return (
     <div className="flex flex-col min-h-screen bg-[#FDFCFB]">
       <Header />
@@ -65,8 +94,9 @@ export default function ProductsPage() {
             {CATEGORIES.map((cat, idx) => (
               <button 
                 key={idx}
+                onClick={() => setSelectedCategory(cat)}
                 className={`px-6 py-2 rounded-full text-xs font-semibold tracking-widest uppercase transition-all duration-300 ${
-                  idx === 0 
+                  selectedCategory === cat 
                   ? "bg-[#5C1218] text-white border-transparent shadow-md" 
                   : "bg-transparent text-gray-600 border border-gray-200 hover:border-[#5C1218] hover:text-[#5C1218]"
                 }`}
@@ -81,19 +111,32 @@ export default function ProductsPage() {
               <input 
                 type="text" 
                 placeholder="Search..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-[#E5B94E] focus:ring-1 focus:ring-[#E5B94E] transition-all"
               />
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <button className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors" aria-label="Filter products">
-              <SlidersHorizontal className="w-4 h-4 text-gray-600" />
-            </button>
+            <div className="relative flex items-center">
+              <select 
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="appearance-none bg-transparent pl-4 pr-10 py-2 border border-gray-200 rounded-full text-xs md:text-sm font-semibold tracking-widest uppercase text-gray-700 hover:border-[#5C1218] focus:outline-none focus:border-[#5C1218] transition-colors cursor-pointer"
+              >
+                <option value="default">Sort: Featured</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+              </select>
+              <div className="absolute right-4 pointer-events-none">
+                 <SlidersHorizontal className="w-4 h-4 text-gray-500" />
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
-          {ALL_PRODUCTS.map((product, idx) => (
+          {filteredProducts.map((product, idx) => (
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}

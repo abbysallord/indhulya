@@ -3,12 +3,23 @@ import Image from "next/image";
 import { Search, MapPin, Heart, ShoppingBag, ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [isPincodeOpen, setIsPincodeOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [selectedPincode, setSelectedPincode] = useState("Enter Pincode");
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchOpen(false);
+    }
+  };
 
   return (
     <header className="w-full bg-white/80 backdrop-blur-xl border-b border-white/50 shadow-sm sticky top-0 z-50 transition-all duration-300">
@@ -27,15 +38,15 @@ export default function Header() {
             className="hidden md:flex items-center cursor-pointer hover:text-gray-600"
             onClick={() => setIsPincodeOpen(!isPincodeOpen)}
           >
-            Enter Pincode <ChevronDown className="w-4 h-4 ml-1" />
+            {selectedPincode} <ChevronDown className="w-4 h-4 ml-1" />
           </div>
           {isPincodeOpen && (
             <div className="absolute top-full left-0 mt-2 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded p-4 z-50 min-w-[200px]">
               <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Select Area</p>
               <ul className="space-y-2 text-sm font-normal">
-                <li className="cursor-pointer hover:bg-gray-50 p-1 rounded" onClick={() => setIsPincodeOpen(false)}>500033 - Jubilee Hills</li>
-                <li className="cursor-pointer hover:bg-gray-50 p-1 rounded" onClick={() => setIsPincodeOpen(false)}>500034 - Banjara Hills</li>
-                <li className="cursor-pointer hover:bg-gray-50 p-1 rounded" onClick={() => setIsPincodeOpen(false)}>500081 - Hitech City</li>
+                <li className="cursor-pointer hover:bg-gray-50 p-1 rounded" onClick={() => { setSelectedPincode("500033 - Jubilee Hills"); setIsPincodeOpen(false); }}>500033 - Jubilee Hills</li>
+                <li className="cursor-pointer hover:bg-gray-50 p-1 rounded" onClick={() => { setSelectedPincode("500034 - Banjara Hills"); setIsPincodeOpen(false); }}>500034 - Banjara Hills</li>
+                <li className="cursor-pointer hover:bg-gray-50 p-1 rounded" onClick={() => { setSelectedPincode("500081 - Hitech City"); setIsPincodeOpen(false); }}>500081 - Hitech City</li>
               </ul>
             </div>
           )}
@@ -58,7 +69,7 @@ export default function Header() {
         {/* Right: Actions */}
         <div className="flex-1 flex items-center justify-end gap-3 md:gap-5">
           <div className="hidden md:flex items-center relative">
-            <div className="flex items-center bg-black/5 rounded-full px-4 py-2 w-48 focus-within:w-64 transition-all duration-300">
+            <form onSubmit={handleSearch} className="flex items-center bg-black/5 rounded-full px-4 py-2 w-48 focus-within:w-64 transition-all duration-300">
               <input 
                 type="text" 
                 placeholder="Search..." 
@@ -68,8 +79,8 @@ export default function Header() {
                 onFocus={() => setIsSearchOpen(true)}
                 onBlur={() => setTimeout(() => setIsSearchOpen(false), 200)}
               />
-              <Search className="w-4 h-4 text-gray-500" />
-            </div>
+              <button type="submit" aria-label="Search"><Search className="w-4 h-4 text-gray-500" /></button>
+            </form>
             {isSearchOpen && searchQuery.length > 0 && (
               <div className="absolute top-full right-0 mt-2 w-64 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded p-4 z-50">
                 <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Suggested Results</p>
@@ -87,20 +98,20 @@ export default function Header() {
               </div>
             )}
           </div>
-          <button className="md:hidden text-gray-700 hover:text-black" aria-label="Search">
+          <Link href="/products" className="md:hidden text-gray-700 hover:text-black" aria-label="Search">
              <Search className="w-5 h-5" />
-          </button>
-          <button onClick={() => alert("Opening Store Locator...")} className="hidden sm:block text-gray-700 hover:text-black" aria-label="Store Locator">
+          </Link>
+          <Link href="/products" className="hidden sm:block text-gray-700 hover:text-black" aria-label="Store Locator">
             <MapPin className="w-5 h-5" />
-          </button>
-          <button onClick={() => alert("Opening Wishlist...")} className="relative text-gray-700 hover:text-black" aria-label="Wishlist">
+          </Link>
+          <Link href="/products" className="relative text-gray-700 hover:text-black" aria-label="Wishlist">
             <Heart className="w-5 h-5" />
             <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">0</span>
-          </button>
-          <button onClick={() => alert("Opening Cart...")} className="relative text-gray-700 hover:text-black" aria-label="Shopping Cart">
+          </Link>
+          <Link href="/products" className="relative text-gray-700 hover:text-black" aria-label="Shopping Cart">
             <ShoppingBag className="w-5 h-5" />
             <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">0</span>
-          </button>
+          </Link>
         </div>
       </div>
 
