@@ -60,9 +60,9 @@ export default function Footer() {
             <h3 className="text-xs md:text-sm font-bold tracking-widest uppercase mb-1 md:mb-2 text-white">Support</h3>
             <ul className="flex flex-col gap-3 text-xs md:text-sm text-gray-300">
               <li className="hover:text-white transition-colors"><Link href="/#contact">Contact Us</Link></li>
-              <li className="hover:text-white transition-colors"><Link href="/">Track Order</Link></li>
-              <li className="hover:text-white transition-colors"><Link href="/">Returns & Exchanges</Link></li>
-              <li className="hover:text-white transition-colors"><Link href="/">Shipping Info</Link></li>
+              <li className="hover:text-white transition-colors"><Link href="/track-order">Track Order</Link></li>
+              <li className="hover:text-white transition-colors"><Link href="/returns-exchanges">Returns & Exchanges</Link></li>
+              <li className="hover:text-white transition-colors"><Link href="/shipping-info">Shipping Info</Link></li>
               <li className="hover:text-white transition-colors"><Link href="/#faq">FAQs</Link></li>
             </ul>
           </div>
