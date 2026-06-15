@@ -28,3 +28,6 @@
 {"timestamp": "2026-06-14T06:27:48Z", "query": "hello", "expanded_query": "hello", "detected_query_type": "GREETING", "retrieved_doc_ids": [], "document_scores": [], "retrieved_count": 0, "retrieval_latency_ms": 0.19}
 {"timestamp": "2026-06-14T08:08:44Z", "query": "now?", "expanded_query": "now?", "detected_query_type": "GENERAL", "retrieved_doc_ids": [], "document_scores": [], "retrieved_count": 0, "retrieval_latency_ms": 1.65}
 {"timestamp": "2026-06-14T08:08:59Z", "query": "WHAT? WHO ARE YOU?", "expanded_query": "what? who are you?", "detected_query_type": "GENERAL", "retrieved_doc_ids": ["faq_1", "faq_2"], "document_scores": [0.2619, 0.2529], "retrieved_count": 2, "retrieval_latency_ms": 0.57}
+{"timestamp": "2026-06-14T19:46:48Z", "query": "hi", "expanded_query": "hi", "detected_query_type": "GREETING", "retrieved_doc_ids": [], "document_scores": [], "retrieved_count": 0, "retrieval_latency_ms": 0.05}
+{"timestamp": "2026-06-15T05:52:24Z", "query": "hi", "expanded_query": "hi", "detected_query_type": "GREETING", "retrieved_doc_ids": [], "document_scores": [], "retrieved_count": 0, "retrieval_latency_ms": 0.27}
+{"timestamp": "2026-06-15T05:52:32Z", "query": "how are you?", "expanded_query": "how are you?", "detected_query_type": "GENERAL", "retrieved_doc_ids": ["faq_2"], "document_scores": [0.2529], "retrieved_count": 1, "retrieval_latency_ms": 1.31}
