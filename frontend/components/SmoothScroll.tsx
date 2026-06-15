@@ -21,13 +21,16 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     rafId = requestAnimationFrame(raf);
 
-    // Force a resize calculation shortly after mounting to ensure the DOM is fully painted
-    const resizeTimer = setTimeout(() => {
+    // Force a resize calculation when the DOM height changes (like filtering products)
+    const resizeObserver = new ResizeObserver(() => {
       lenis.resize();
-    }, 500);
+    });
+    
+    resizeObserver.observe(document.body);
+    resizeObserver.observe(document.documentElement);
 
     return () => {
-      clearTimeout(resizeTimer);
+      resizeObserver.disconnect();
       cancelAnimationFrame(rafId);
       lenis.destroy();
     };
