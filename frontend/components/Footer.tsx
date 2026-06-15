@@ -48,11 +48,10 @@ export default function Footer() {
           <div className="col-span-1 flex flex-col gap-4">
             <h3 className="text-xs md:text-sm font-bold tracking-widest uppercase mb-1 md:mb-2 text-white">Shop</h3>
             <ul className="flex flex-col gap-3 text-xs md:text-sm text-gray-300">
-              <li className="hover:text-white transition-colors"><Link href="/products">One Gram Gold</Link></li>
-              <li className="hover:text-white transition-colors"><Link href="/products">Temple Jewelry</Link></li>
-              <li className="hover:text-white transition-colors"><Link href="/products">Necklaces & Sets</Link></li>
-              <li className="hover:text-white transition-colors"><Link href="/products">Earrings & Jhumkas</Link></li>
-              <li className="hover:text-white transition-colors"><Link href="/products">Bangles & Bracelets</Link></li>
+              <li className="hover:text-white transition-colors"><Link href="/#one-gram-gold">One Gram Gold</Link></li>
+              <li className="hover:text-white transition-colors"><Link href="/products?category=Necklaces">Necklaces & Sets</Link></li>
+              <li className="hover:text-white transition-colors"><Link href="/products?category=Earrings">Earrings & Jhumkas</Link></li>
+              <li className="hover:text-white transition-colors"><Link href="/products?category=Bangles">Bangles & Bracelets</Link></li>
             </ul>
           </div>
 
@@ -61,9 +60,9 @@ export default function Footer() {
             <h3 className="text-xs md:text-sm font-bold tracking-widest uppercase mb-1 md:mb-2 text-white">Support</h3>
             <ul className="flex flex-col gap-3 text-xs md:text-sm text-gray-300">
               <li className="hover:text-white transition-colors"><Link href="/#contact">Contact Us</Link></li>
-              <li className="hover:text-white transition-colors"><Link href="/products">Track Order</Link></li>
-              <li className="hover:text-white transition-colors"><Link href="/products">Returns & Exchanges</Link></li>
-              <li className="hover:text-white transition-colors"><Link href="/products">Shipping Info</Link></li>
+              <li className="hover:text-white transition-colors"><Link href="/">Track Order</Link></li>
+              <li className="hover:text-white transition-colors"><Link href="/">Returns & Exchanges</Link></li>
+              <li className="hover:text-white transition-colors"><Link href="/">Shipping Info</Link></li>
               <li className="hover:text-white transition-colors"><Link href="/#faq">FAQs</Link></li>
             </ul>
           </div>

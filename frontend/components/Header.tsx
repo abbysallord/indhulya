@@ -174,23 +174,17 @@ export default function Header() {
       <nav className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:block w-full border-t border-black/5 bg-white/95 md:bg-transparent absolute md:relative left-0 top-full md:top-auto shadow-md md:shadow-none`}>
         <ul className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 py-6 md:py-4 px-4 min-w-max mx-auto text-xs font-semibold tracking-wider uppercase text-gray-700">
           <li className="relative group cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
-            <Link href="#one-gram-gold">
+            <Link href="/#one-gram-gold">
               <span className="absolute -top-4 -right-4 bg-[#E5B94E] text-black text-[8px] px-2 py-0.5 rounded-full font-bold shadow-sm">Luxe</span>
               One Gram Gold
             </Link>
           </li>
-          <li className="relative group cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
-            <Link href="#editorial">
-              <span className="absolute -top-4 -right-4 bg-red-500 text-white text-[8px] px-2 py-0.5 rounded-full font-bold shadow-sm">New</span>
-              Temple Jewelry
-            </Link>
-          </li>
-          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="#bestsellers">Best Sellers</Link></li>
-          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="#categories">Necklaces</Link></li>
-          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="#categories">Earrings</Link></li>
-          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="#categories">Bracelets</Link></li>
-          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="#categories">Bangles & Kada</Link></li>
-          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="#categories">Jhumkas</Link></li>
+          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="/#bestsellers">Best Sellers</Link></li>
+          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="/products?category=Necklaces">Necklaces</Link></li>
+          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="/products?category=Earrings">Earrings</Link></li>
+          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="/products?search=Bracelets">Bracelets</Link></li>
+          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="/products?category=Bangles">Bangles & Kada</Link></li>
+          <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="/products?search=Jhumkas">Jhumkas</Link></li>
         </ul>
       </nav>
     </header>
