@@ -65,7 +65,7 @@ export default function CartPage() {
                   >
                     <div className="col-span-1 md:col-span-6 flex gap-6">
                       <div className="w-24 h-32 relative bg-gray-50 shrink-0">
-                        <Image src={product.image} alt={product.name} fill className="object-cover" />
+                        <Image src={product.image} alt={product.name} fill className="object-cover" sizes="96px" />
                       </div>
                       <div className="flex flex-col justify-center">
                         {product.category && <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">{product.category}</p>}
