@@ -2,9 +2,17 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 export default function OurStoryPage() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  });
+  
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
   return (
     <div className="flex flex-col min-h-screen bg-[#FDFCFB] selection:bg-[#5C1218] selection:text-white">
       <Header />
@@ -31,19 +39,22 @@ export default function OurStoryPage() {
 
         {/* Feature Image */}
         <motion.div 
+          ref={containerRef}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7 }}
           className="relative w-full h-[50vh] md:h-[70vh] rounded-2xl overflow-hidden mb-20 md:mb-32 shadow-xl"
         >
-          <Image
-            src="https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&fit=crop&crop=faces"
-            alt="Artisan crafting jewelry"
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
+          <motion.div style={{ scale }} className="absolute inset-0 w-full h-full origin-center">
+            <Image
+              src="https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&fit=crop&crop=faces"
+              alt="Artisan crafting jewelry"
+              fill
+              priority
+              className="object-cover"
+              sizes="100vw"
+            />
+          </motion.div>
           <div className="absolute inset-0 bg-black/10" />
         </motion.div>
 

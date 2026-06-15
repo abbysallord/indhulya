@@ -126,7 +126,7 @@ export default function EditorialSection() {
                 ))}
               </motion.div>
               <Link 
-                href="/products"
+                href="/our-story"
                 className="inline-block text-center border border-black text-black px-8 py-3 text-sm font-bold tracking-widest uppercase hover:bg-black hover:text-white transition-colors"
               >
                 Read Our Story
