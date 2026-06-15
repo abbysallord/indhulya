@@ -61,10 +61,13 @@ export default function Header() {
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
           <div 
-            className="hidden md:flex items-center cursor-pointer hover:text-gray-600 truncate max-w-[200px]"
+            className="hidden md:flex items-center cursor-pointer hover:text-gray-600"
             onClick={() => setIsPincodeOpen(!isPincodeOpen)}
           >
-            {isMounted && deliveryLocation ? deliveryLocation : "Enter Pincode"} <ChevronDown className="w-4 h-4 ml-1 shrink-0" />
+            <span className="truncate max-w-[120px] lg:max-w-[200px]">
+              {isMounted && deliveryLocation ? deliveryLocation.split(',')[0] : "Enter Pincode"}
+            </span>
+            <ChevronDown className="w-4 h-4 ml-1 shrink-0" />
           </div>
           {isPincodeOpen && (
             <div className="absolute top-full left-0 mt-2 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded p-4 z-50 w-[240px]">
