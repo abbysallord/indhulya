@@ -9,26 +9,64 @@ import { useState, useMemo, useEffect } from "react";
 
 // Using unique Unsplash IDs for a rich catalog feel
 const ALL_PRODUCTS = [
+  // Necklaces
   { id: 1, name: "Navya Heritage Short Necklace", category: "Necklaces", price: "₹1,200", image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=600&fit=crop" },
-  { id: 2, name: "Pushpa Floral Kemp Bangles", category: "Bangles", price: "₹850", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop" },
-  { id: 3, name: "Divine Lakshmi Jhumkas", category: "Earrings", price: "₹999", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop" },
-  { id: 4, name: "Varna Versatile Choker", category: "Chokers", price: "₹3,200", image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=600&fit=crop&crop=bottom" },
   { id: 5, name: "Aavya Gutta Pusalu", category: "Necklaces", price: "₹2,800", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop&crop=top" },
-  { id: 6, name: "Mayura Peacock Long Haram", category: "Long Harams", price: "₹3,500", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop&crop=faces" },
+  { id: 11, name: "Classic Gold Chain", category: "Necklaces", price: "₹2,100", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop&crop=top" },
+  { id: 13, name: "Temple Coin Long Haram", category: "Necklaces", price: "₹3,500", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop&crop=faces" },
+  
+  // Earrings
+  { id: 3, name: "Divine Lakshmi Jhumkas", category: "Earrings", price: "₹999", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop" },
+  { id: 9, name: "Aura Minimalist Studs", category: "Earrings", price: "₹450", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop" },
+  { id: 14, name: "Kundan Chandbali Drops", category: "Earrings", price: "₹1,150", image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=600&fit=crop" },
+  { id: 15, name: "Ruby Embellished Tops", category: "Earrings", price: "₹899", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop" },
+
+  // Bangles
+  { id: 2, name: "Pushpa Floral Kemp Bangles", category: "Bangles", price: "₹850", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop" },
   { id: 7, name: "Lakshmi Mahotsav Kada", category: "Bangles", price: "₹850", image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=600&fit=crop" },
   { id: 8, name: "Star-Burst CZ Bangles", category: "Bangles", price: "₹999", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop" },
-  { id: 9, name: "Aura Minimalist Studs", category: "Earrings", price: "₹450", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop" },
-  { id: 10, name: "Royal Rajputi Nath", category: "Nose Rings", price: "₹1,500", image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=600&fit=crop&crop=bottom" },
-  { id: 11, name: "Classic Gold Chain", category: "Chains", price: "₹2,100", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop&crop=top" },
+  { id: 16, name: "Antique Gold Polki Bangles", category: "Bangles", price: "₹1,250", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop" },
+
+  // Chokers
+  { id: 4, name: "Varna Versatile Choker", category: "Chokers", price: "₹3,200", image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=600&fit=crop&crop=bottom" },
+  { id: 17, name: "Emerald Beaded Choker", category: "Chokers", price: "₹2,600", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop" },
+  { id: 18, name: "Polki Meenakari Choker", category: "Chokers", price: "₹4,100", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop" },
+  { id: 19, name: "Pearl Drop AD Choker", category: "Chokers", price: "₹2,950", image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=600&fit=crop" },
+
+  // Bridal Sets
   { id: 12, name: "Bridal Complete Set", category: "Bridal Sets", price: "₹15,000", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop&crop=faces" },
+  { id: 20, name: "South Indian Wedding Set", category: "Bridal Sets", price: "₹18,500", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop" },
+  { id: 21, name: "Rajputi Royal Collection", category: "Bridal Sets", price: "₹22,000", image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=600&fit=crop" },
+  { id: 22, name: "Kundan Grandeur Set", category: "Bridal Sets", price: "₹14,200", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop" },
+
+  // Rings
+  { id: 23, name: "Solitaire AD Ring", category: "Rings", price: "₹599", image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=600&fit=crop" },
+  { id: 24, name: "Antique Temple Ring", category: "Rings", price: "₹750", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop" },
+  { id: 25, name: "Navratna Statement Ring", category: "Rings", price: "₹1,100", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop" },
+  { id: 26, name: "Floral Ruby Cocktail Ring", category: "Rings", price: "₹890", image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=600&fit=crop" },
+
+  // Mangalsutras
+  { id: 27, name: "Classic Short Mangalsutra", category: "Mangalsutras", price: "₹1,250", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop" },
+  { id: 28, name: "Diamond Pendant Mangalsutra", category: "Mangalsutras", price: "₹1,850", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop" },
+  { id: 29, name: "Traditional Long Mangalsutra", category: "Mangalsutras", price: "₹2,400", image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=600&fit=crop" },
+  { id: 30, name: "Maharashtrian Vati Mangalsutra", category: "Mangalsutras", price: "₹1,600", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop" },
+
+  // Men's
+  { id: 31, name: "Gold Plated Rudraksha Chain", category: "Men's", price: "₹1,100", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop" },
+  { id: 32, name: "Classic Cuban Link Chain", category: "Men's", price: "₹2,200", image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=600&fit=crop" },
+  { id: 33, name: "Lion Head Statement Ring", category: "Men's", price: "₹950", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&fit=crop" },
+  { id: 34, name: "Sikh Kada Bracelet", category: "Men's", price: "₹850", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&fit=crop" },
 ];
 
-const CATEGORIES = ["All", "Necklaces", "Earrings", "Bangles", "Chokers", "Bridal Sets"];
+const CATEGORIES = ["All", "Necklaces", "Earrings", "Bangles", "Chokers", "Bridal Sets", "Rings", "Mangalsutras", "Men's"];
 
 export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("default");
+  
+  const PRODUCTS_PER_PAGE = 12;
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -63,6 +101,18 @@ export default function ProductsPage() {
 
     return result;
   }, [selectedCategory, searchQuery, sortBy]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery, sortBy]);
+
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * PRODUCTS_PER_PAGE,
+    currentPage * PRODUCTS_PER_PAGE
+  );
+  
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#FDFCFB]">
@@ -146,7 +196,8 @@ export default function ProductsPage() {
 
         {/* Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
-          {filteredProducts.map((product, idx) => (
+          {paginatedProducts.length > 0 ? (
+            paginatedProducts.map((product, idx) => (
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -188,15 +239,54 @@ export default function ProductsPage() {
                 <p className="font-medium text-gray-900">{product.price}</p>
               </div>
             </motion.div>
-          ))}
+          ))) : (
+            <div className="col-span-full py-20 text-center">
+              <h3 className="text-xl text-gray-500 font-serif mb-2">No products found</h3>
+              <p className="text-sm text-gray-400">Try adjusting your filters or search query.</p>
+              <button 
+                onClick={() => { setSelectedCategory("All"); setSearchQuery(""); }} 
+                className="mt-6 px-6 py-2 bg-[#5C1218] text-white text-xs tracking-widest uppercase font-semibold"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Load More */}
-        <div className="w-full flex justify-center mt-20">
-          <button className="px-10 py-4 border border-black text-black font-semibold text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-colors duration-300">
-            Load More Products
-          </button>
-        </div>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="w-full flex justify-center items-center gap-2 mt-20">
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 border border-gray-200 text-sm font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
+            >
+              Prev
+            </button>
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`w-10 h-10 flex items-center justify-center border text-sm font-semibold transition-colors ${
+                  currentPage === page 
+                  ? "bg-[#5C1218] text-white border-[#5C1218]" 
+                  : "bg-transparent text-gray-600 border-gray-200 hover:border-[#5C1218] hover:text-[#5C1218]"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 border border-gray-200 text-sm font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
+            >
+              Next
+            </button>
+          </div>
+        )}
 
       </main>
       
