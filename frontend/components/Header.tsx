@@ -107,13 +107,13 @@ export default function Header() {
           <Link href="/store-locator" className="hidden sm:block text-gray-700 hover:text-black" aria-label="Store Locator">
             <MapPin className="w-5 h-5" />
           </Link>
-          <Link href="/products" className="relative text-gray-700 hover:text-black" aria-label="Wishlist">
+          <Link href="/wishlist" className="relative text-gray-700 hover:text-black" aria-label="Wishlist">
             <Heart className="w-5 h-5" />
             {isMounted && wishlistCount > 0 && (
               <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">{wishlistCount}</span>
             )}
           </Link>
-          <Link href="/products" className="relative text-gray-700 hover:text-black" aria-label="Shopping Cart">
+          <Link href="/cart" className="relative text-gray-700 hover:text-black" aria-label="Shopping Cart">
             <ShoppingBag className="w-5 h-5" />
             {isMounted && cartCount > 0 && (
               <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">{cartCount}</span>

@@ -12,9 +12,10 @@ export type Product = {
 
 type StoreContextType = {
   cart: Product[];
-  wishlist: (number | string)[]; // Store IDs of wishlisted items
+  wishlist: Product[]; // Store full product objects
   addToCart: (product: Product) => void;
-  toggleWishlist: (productId: number | string) => void;
+  removeFromCart: (productId: number | string) => void;
+  toggleWishlist: (product: Product) => void;
   cartCount: number;
   wishlistCount: number;
   isMounted: boolean;
@@ -24,7 +25,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<Product[]>([]);
-  const [wishlist, setWishlist] = useState<(number | string)[]>([]);
+  const [wishlist, setWishlist] = useState<Product[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -50,11 +51,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setCart((prev) => [...prev, product]);
   };
 
-  const toggleWishlist = (productId: number | string) => {
+  const removeFromCart = (productId: number | string) => {
+    setCart((prev) => prev.filter(p => p.id !== productId));
+  };
+
+  const toggleWishlist = (product: Product) => {
     setWishlist((prev) => 
-      prev.includes(productId) 
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId]
+      prev.some(p => p.id === product.id) 
+        ? prev.filter(p => p.id !== product.id)
+        : [...prev, product]
     );
   };
 
@@ -63,6 +68,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       cart,
       wishlist,
       addToCart,
+      removeFromCart,
       toggleWishlist,
       cartCount: cart.length,
       wishlistCount: wishlist.length,
