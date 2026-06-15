@@ -8,7 +8,7 @@ import { ArrowLeft, X, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function CartPage() {
-  const { cart, removeFromCart, isMounted } = useStore();
+  const { cart, removeFromCart, isMounted, deliveryLocation } = useStore();
 
   const parsePrice = (price: string | number) => {
     if (typeof price === 'number') return price;
@@ -105,10 +105,21 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-between items-end mb-8">
+                <div className="flex justify-between items-end mb-6">
                   <span className="text-base font-semibold uppercase tracking-wider">Total</span>
                   <span className="text-2xl font-serif text-[#5C1218]">₹{total.toLocaleString('en-IN')}</span>
                 </div>
+
+                {deliveryLocation && (
+                  <div className="bg-green-50 text-green-800 text-xs px-4 py-3 rounded mb-6 border border-green-100 flex items-start gap-2">
+                    <div className="mt-0.5">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    </div>
+                    <div>
+                      <span className="font-semibold">Delivery available:</span> {deliveryLocation}
+                    </div>
+                  </div>
+                )}
 
                 <button className="w-full py-4 bg-[#5C1218] text-white font-semibold text-xs tracking-widest uppercase flex items-center justify-center gap-2 hover:bg-black transition-colors">
                   <Lock className="w-4 h-4" />

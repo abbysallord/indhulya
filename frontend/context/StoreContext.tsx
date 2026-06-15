@@ -13,9 +13,11 @@ export type Product = {
 type StoreContextType = {
   cart: Product[];
   wishlist: Product[]; // Store full product objects
+  deliveryLocation: string | null;
   addToCart: (product: Product) => void;
   removeFromCart: (productId: number | string) => void;
   toggleWishlist: (product: Product) => void;
+  setDeliveryLocation: (location: string | null) => void;
   cartCount: number;
   wishlistCount: number;
   isMounted: boolean;
@@ -26,6 +28,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<Product[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
+  const [deliveryLocation, setDeliveryLocation] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -34,6 +37,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       try {
         const savedCart = localStorage.getItem("indhulya_cart");
         const savedWishlist = localStorage.getItem("indhulya_wishlist");
+        const savedLocation = localStorage.getItem("indhulya_location");
         if (savedCart) {
           const parsed = JSON.parse(savedCart);
           if (Array.isArray(parsed) && (parsed.length === 0 || typeof parsed[0] === 'object')) {
@@ -50,6 +54,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             localStorage.removeItem("indhulya_wishlist");
           }
         }
+        if (savedLocation) {
+          setDeliveryLocation(savedLocation);
+        }
       } catch (error) {
         console.error("Could not load from localStorage", error);
       }
@@ -61,8 +68,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (isMounted) {
       localStorage.setItem("indhulya_cart", JSON.stringify(cart));
       localStorage.setItem("indhulya_wishlist", JSON.stringify(wishlist));
+      if (deliveryLocation) {
+        localStorage.setItem("indhulya_location", deliveryLocation);
+      } else {
+        localStorage.removeItem("indhulya_location");
+      }
     }
-  }, [cart, wishlist, isMounted]);
+  }, [cart, wishlist, deliveryLocation, isMounted]);
 
   const addToCart = (product: Product) => {
     setCart((prev) => [...prev, product]);
@@ -84,9 +96,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     <StoreContext.Provider value={{
       cart,
       wishlist,
+      deliveryLocation,
       addToCart,
       removeFromCart,
       toggleWishlist,
+      setDeliveryLocation,
       cartCount: cart.length,
       wishlistCount: wishlist.length,
       isMounted

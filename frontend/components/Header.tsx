@@ -11,16 +11,39 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [selectedPincode, setSelectedPincode] = useState("Enter Pincode");
+  const [isLoadingPincode, setIsLoadingPincode] = useState(false);
   const router = useRouter();
   
-  const { cartCount, wishlistCount, isMounted } = useStore();
+  const { cartCount, wishlistCount, isMounted, deliveryLocation, setDeliveryLocation } = useStore();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
       setIsSearchOpen(false);
+    }
+  };
+
+  const verifyPincode = async (val: string) => {
+    if (val.length === 6 && /^\d+$/.test(val)) {
+      setIsLoadingPincode(true);
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${val}`);
+        const data = await res.json();
+        if (data && data[0] && data[0].Status === "Success") {
+          const po = data[0].PostOffice[0];
+          setDeliveryLocation(`${po.Name}, ${po.District} (${val})`);
+          setIsPincodeOpen(false);
+        } else {
+          alert("Invalid Pincode. Delivery not available.");
+        }
+      } catch (e) {
+        alert("Failed to verify pincode. Please try again.");
+      } finally {
+        setIsLoadingPincode(false);
+      }
+    } else {
+      alert("Please enter a valid 6-digit Indian Pincode.");
     }
   };
 
@@ -38,10 +61,10 @@ export default function Header() {
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
           <div 
-            className="hidden md:flex items-center cursor-pointer hover:text-gray-600"
+            className="hidden md:flex items-center cursor-pointer hover:text-gray-600 truncate max-w-[200px]"
             onClick={() => setIsPincodeOpen(!isPincodeOpen)}
           >
-            {selectedPincode} <ChevronDown className="w-4 h-4 ml-1" />
+            {isMounted && deliveryLocation ? deliveryLocation : "Enter Pincode"} <ChevronDown className="w-4 h-4 ml-1 shrink-0" />
           </div>
           {isPincodeOpen && (
             <div className="absolute top-full left-0 mt-2 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded p-4 z-50 w-[240px]">
@@ -55,31 +78,20 @@ export default function Header() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                        e.preventDefault();
-                       const val = e.currentTarget.value;
-                       if(val.length === 6 && /^\d+$/.test(val)) {
-                          setSelectedPincode(`Deliver to ${val}`);
-                          setIsPincodeOpen(false);
-                       } else {
-                          alert("Please enter a valid 6-digit Indian Pincode.");
-                       }
+                       verifyPincode(e.currentTarget.value);
                     }
                   }}
                 />
                 <button 
-                  className="bg-black text-white px-3 py-2 rounded text-xs font-semibold hover:bg-gray-800 transition-colors"
+                  className="bg-black text-white px-3 py-2 rounded text-xs font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 min-w-[60px]"
+                  disabled={isLoadingPincode}
                   onClick={(e) => {
                     e.preventDefault();
                     const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                    const val = input.value;
-                    if(val.length === 6 && /^\d+$/.test(val)) {
-                      setSelectedPincode(`Deliver to ${val}`);
-                      setIsPincodeOpen(false);
-                    } else {
-                      alert("Please enter a valid 6-digit Indian Pincode.");
-                    }
+                    verifyPincode(input.value);
                   }}
                 >
-                  Apply
+                  {isLoadingPincode ? "..." : "Apply"}
                 </button>
               </div>
             </div>
