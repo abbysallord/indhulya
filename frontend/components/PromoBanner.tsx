@@ -31,8 +31,8 @@ export default function PromoBanner() {
                 <React.Fragment key={idx}>
                   <motion.span 
                     variants={{
-                      hidden: { opacity: 0, filter: "blur(10px)", y: 15 },
-                      visible: { opacity: 1, filter: "blur(0px)", y: 0 }
+                      hidden: { opacity: 0, y: 15 },
+                      visible: { opacity: 1, y: 0 }
                     }}
                     transition={{ duration: 0.8 }}
                     className="inline-block mr-3"

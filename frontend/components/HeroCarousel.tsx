@@ -135,8 +135,8 @@ export default function HeroCarousel() {
                     <motion.span
                       key={idx}
                       variants={{
-                        hidden: { opacity: 0, filter: "blur(10px)", y: 20 },
-                        visible: { opacity: 1, filter: "blur(0px)", y: 0 },
+                        hidden: { opacity: 0, y: 20 },
+                        visible: { opacity: 1, y: 0 },
                       }}
                       transition={{ duration: 0.6 }}
                       className="inline-block"

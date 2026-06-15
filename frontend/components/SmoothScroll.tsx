@@ -21,7 +21,6 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     rafId = requestAnimationFrame(raf);
 
-    // Force a resize calculation when the DOM height changes (like filtering products)
     const resizeObserver = new ResizeObserver(() => {
       lenis.resize();
     });
@@ -29,7 +28,24 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     resizeObserver.observe(document.body);
     resizeObserver.observe(document.documentElement);
 
+    // Handle smooth scrolling for hash links
+    const handleHashClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest('a');
+      if (anchor && anchor.hash && anchor.hash.startsWith('#')) {
+        const id = anchor.hash.substring(1);
+        const element = document.getElementById(id);
+        if (element) {
+          e.preventDefault();
+          lenis.scrollTo(element, { offset: -140 }); // Offset for sticky header
+        }
+      }
+    };
+    
+    document.addEventListener('click', handleHashClick);
+
     return () => {
+      document.removeEventListener('click', handleHashClick);
       resizeObserver.disconnect();
       cancelAnimationFrame(rafId);
       lenis.destroy();
