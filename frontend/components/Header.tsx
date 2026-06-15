@@ -124,6 +124,7 @@ export default function Header() {
               <input 
                 type="text" 
                 placeholder="Search..." 
+                maxLength={50}
                 className="bg-transparent border-none outline-none text-sm w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

@@ -200,6 +200,7 @@ function ProductsContent() {
               <input 
                 type="text" 
                 placeholder="Search products..." 
+                maxLength={50}
                 value={searchQuery}
                 onChange={handleSearchChange}
                 className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-[#E5B94E] focus:ring-1 focus:ring-[#E5B94E] transition-all"

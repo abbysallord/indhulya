@@ -64,6 +64,7 @@ export default async function DashboardLayout({
             <input 
               type="text" 
               placeholder="Search..." 
+              maxLength={50}
               className="w-full bg-white/80 border border-slate-200 shadow-sm rounded-full py-2 md:py-2.5 pl-10 md:pl-12 pr-4 text-xs md:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all"
             />
           </div>

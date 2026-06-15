@@ -87,6 +87,7 @@ export default function AdminLogin() {
                 type="text"
                 name="username"
                 required
+                maxLength={50}
                 className="w-full bg-white/80 border border-slate-200 rounded-xl px-5 py-4 text-slate-900 placeholder-transparent focus:outline-none focus:border-[#E5B94E] focus:ring-1 focus:ring-[#E5B94E] transition-all peer"
                 placeholder="Username"
                 autoComplete="off"
@@ -101,6 +102,7 @@ export default function AdminLogin() {
                 type="password"
                 name="password"
                 required
+                maxLength={50}
                 className="w-full bg-white/80 border border-slate-200 rounded-xl px-5 py-4 text-slate-900 placeholder-transparent focus:outline-none focus:border-[#E5B94E] focus:ring-1 focus:ring-[#E5B94E] transition-all peer"
                 placeholder="Password"
               />
