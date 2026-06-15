@@ -44,13 +44,44 @@ export default function Header() {
             {selectedPincode} <ChevronDown className="w-4 h-4 ml-1" />
           </div>
           {isPincodeOpen && (
-            <div className="absolute top-full left-0 mt-2 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded p-4 z-50 min-w-[200px]">
-              <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Select Area</p>
-              <ul className="space-y-2 text-sm font-normal">
-                <li className="cursor-pointer hover:bg-gray-50 p-1 rounded" onClick={() => { setSelectedPincode("500033 - Jubilee Hills"); setIsPincodeOpen(false); }}>500033 - Jubilee Hills</li>
-                <li className="cursor-pointer hover:bg-gray-50 p-1 rounded" onClick={() => { setSelectedPincode("500034 - Banjara Hills"); setIsPincodeOpen(false); }}>500034 - Banjara Hills</li>
-                <li className="cursor-pointer hover:bg-gray-50 p-1 rounded" onClick={() => { setSelectedPincode("500081 - Hitech City"); setIsPincodeOpen(false); }}>500081 - Hitech City</li>
-              </ul>
+            <div className="absolute top-full left-0 mt-2 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded p-4 z-50 w-[240px]">
+              <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Check Delivery Availability</p>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="text" 
+                  maxLength={6}
+                  placeholder="6-digit Pincode"
+                  className="w-full bg-black/5 border-none rounded px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-black transition-all"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                       e.preventDefault();
+                       const val = e.currentTarget.value;
+                       if(val.length === 6 && /^\d+$/.test(val)) {
+                          setSelectedPincode(`Deliver to ${val}`);
+                          setIsPincodeOpen(false);
+                       } else {
+                          alert("Please enter a valid 6-digit Indian Pincode.");
+                       }
+                    }
+                  }}
+                />
+                <button 
+                  className="bg-black text-white px-3 py-2 rounded text-xs font-semibold hover:bg-gray-800 transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                    const val = input.value;
+                    if(val.length === 6 && /^\d+$/.test(val)) {
+                      setSelectedPincode(`Deliver to ${val}`);
+                      setIsPincodeOpen(false);
+                    } else {
+                      alert("Please enter a valid 6-digit Indian Pincode.");
+                    }
+                  }}
+                >
+                  Apply
+                </button>
+              </div>
             </div>
           )}
         </div>
