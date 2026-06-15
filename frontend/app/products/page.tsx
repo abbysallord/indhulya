@@ -5,7 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, Heart, ShoppingBag, ArrowLeft } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
 // Using unique Unsplash IDs for a rich catalog feel
 const ALL_PRODUCTS = [
@@ -60,7 +61,8 @@ const ALL_PRODUCTS = [
 
 const CATEGORIES = ["All", "Necklaces", "Earrings", "Bangles", "Chokers", "Bridal Sets", "Rings", "Mangalsutras", "Men's"];
 
-export default function ProductsPage() {
+function ProductsContent() {
+  const searchParams = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("default");
@@ -68,15 +70,34 @@ export default function ProductsPage() {
   const PRODUCTS_PER_PAGE = 12;
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Safely initialize state from URL params
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const search = params.get("search");
-      if (search) {
+    const search = searchParams.get("search");
+    if (search) {
+      // If the search term is a known category, activate the category instead of the search bar
+      const matchedCategory = CATEGORIES.find(c => c.toLowerCase() === search.toLowerCase());
+      if (matchedCategory) {
+        setSelectedCategory(matchedCategory);
+        setSearchQuery("");
+      } else {
         setSearchQuery(search);
+        setSelectedCategory("All");
       }
     }
-  }, []);
+  }, [searchParams]);
+
+  // Handle conflicts: clicking a category clears search, typing a search clears category
+  const handleCategoryClick = (cat: string) => {
+    setSelectedCategory(cat);
+    setSearchQuery("");
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setSelectedCategory("All");
+    setCurrentPage(1);
+  };
 
   const filteredProducts = useMemo(() => {
     let result = [...ALL_PRODUCTS];
@@ -102,10 +123,10 @@ export default function ProductsPage() {
     return result;
   }, [selectedCategory, searchQuery, sortBy]);
 
-  // Reset pagination when filters change
+  // Reset pagination when sortBy changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategory, searchQuery, sortBy]);
+  }, [sortBy]);
 
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * PRODUCTS_PER_PAGE,
@@ -115,9 +136,6 @@ export default function ProductsPage() {
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#FDFCFB]">
-      <Header />
-      
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 md:px-8 py-8 md:py-16 pt-32">
         
         {/* Back Navigation */}
@@ -154,7 +172,7 @@ export default function ProductsPage() {
             {CATEGORIES.map((cat, idx) => (
               <button 
                 key={idx}
-                onClick={() => setSelectedCategory(cat)}
+                onClick={() => handleCategoryClick(cat)}
                 className={`px-6 py-2 rounded-full text-xs font-semibold tracking-widest uppercase transition-all duration-300 ${
                   selectedCategory === cat 
                   ? "bg-[#5C1218] text-white border-transparent shadow-md" 
@@ -170,9 +188,9 @@ export default function ProductsPage() {
             <div className="relative flex-1 md:w-64">
               <input 
                 type="text" 
-                placeholder="Search..." 
+                placeholder="Search products..." 
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-[#E5B94E] focus:ring-1 focus:ring-[#E5B94E] transition-all"
               />
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -289,7 +307,20 @@ export default function ProductsPage() {
         )}
 
       </main>
-      
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <div className="flex flex-col min-h-screen bg-[#FDFCFB]">
+      <Header />
+      <Suspense fallback={
+        <div className="flex-1 w-full flex items-center justify-center pt-32">
+          <div className="w-8 h-8 border-4 border-[#5C1218] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      }>
+        <ProductsContent />
+      </Suspense>
       <Footer />
     </div>
   );
