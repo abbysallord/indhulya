@@ -75,7 +75,7 @@ export default function ContactSection() {
 
               <div>
                 <label htmlFor="message" className="block text-xs font-semibold tracking-widest uppercase text-gray-500 mb-2">Message *</label>
-                <textarea id="message" required maxLength={500} rows={4} className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent resize-none"></textarea>
+                <textarea id="message" required maxLength={500} rows={4} className="w-full border border-gray-300 p-3 focus:outline-none focus:border-[#5C1218] transition-colors bg-transparent resize-none"></textarea>
               </div>
 
               <div className="flex items-center gap-3 py-2">
