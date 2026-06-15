@@ -54,7 +54,7 @@ export default function Header() {
         {/* Left: Mobile Hamburger & Pincode */}
         <div className="flex-1 flex items-center text-xs font-semibold relative">
           <button 
-            className="md:hidden mr-4 text-gray-700 hover:text-black"
+            className="md:hidden mr-4 text-gray-700 hover:text-black p-2 -ml-2"
             aria-label="Toggle mobile menu"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
@@ -150,22 +150,22 @@ export default function Header() {
               </div>
             )}
           </div>
-          <Link href="/products" className="md:hidden text-gray-700 hover:text-black" aria-label="Search">
+          <Link href="/products" className="md:hidden text-gray-700 hover:text-black p-2" aria-label="Search">
              <Search className="w-5 h-5" />
           </Link>
-          <Link href="/store-locator" className="hidden sm:block text-gray-700 hover:text-black" aria-label="Store Locator">
+          <Link href="/store-locator" className="hidden sm:block text-gray-700 hover:text-black p-2" aria-label="Store Locator">
             <MapPin className="w-5 h-5" />
           </Link>
-          <Link href="/wishlist" className="relative text-gray-700 hover:text-black" aria-label="Wishlist">
+          <Link href="/wishlist" className="relative text-gray-700 hover:text-black p-2" aria-label="Wishlist">
             <Heart className="w-5 h-5" />
             {isMounted && wishlistCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">{wishlistCount}</span>
+              <span className="absolute top-0.5 right-0.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">{wishlistCount}</span>
             )}
           </Link>
-          <Link href="/cart" className="relative text-gray-700 hover:text-black" aria-label="Shopping Cart">
+          <Link href="/cart" className="relative text-gray-700 hover:text-black p-2" aria-label="Shopping Cart">
             <ShoppingBag className="w-5 h-5" />
             {isMounted && cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">{cartCount}</span>
+              <span className="absolute top-0.5 right-0.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">{cartCount}</span>
             )}
           </Link>
         </div>

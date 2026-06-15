@@ -6,12 +6,12 @@ import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const showcaseImages = [
-  { id: 1, src: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=800&fit=crop", title: "Temple Masterpieces" },
-  { id: 2, src: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=800&fit=crop", title: "The Heritage Bride" },
-  { id: 3, src: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=800&fit=crop", title: "Antique Gold" },
-  { id: 4, src: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=800&fit=crop&crop=bottom", title: "Everyday Elegance" },
-  { id: 5, src: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=800&fit=crop&crop=top", title: "Modern Classics" },
-  { id: 6, src: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=800&fit=crop&crop=faces", title: "One Gram Luxury" },
+  { id: 1, src: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&fit=crop", title: "Temple Masterpieces" },
+  { id: 2, src: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&fit=crop", title: "The Heritage Bride" },
+  { id: 3, src: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&fit=crop", title: "Antique Gold" },
+  { id: 4, src: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&fit=crop&crop=bottom", title: "Everyday Elegance" },
+  { id: 5, src: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&fit=crop&crop=top", title: "Modern Classics" },
+  { id: 6, src: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&fit=crop&crop=faces", title: "One Gram Luxury" },
 ];
 
 export default function FlashyShowcase() {

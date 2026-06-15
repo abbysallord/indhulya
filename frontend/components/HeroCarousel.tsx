@@ -8,28 +8,28 @@ import Link from "next/link";
 const slides = [
   {
     id: 1,
-    image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=2000&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&auto=format&fit=crop",
     title: "HERITAGE",
     subtitle: "Elegance",
     description: "One Gram Gold • Antique • Temple Jewelry",
   },
   {
     id: 2,
-    image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=2000&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&auto=format&fit=crop",
     title: "TIMELESS",
     subtitle: "Tradition",
     description: "Kemp Stones • Nakshi Work • CZ Bangles",
   },
   {
     id: 3,
-    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=2000&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&auto=format&fit=crop",
     title: "FESTIVE",
     subtitle: "Radiance",
     description: "Bridal Sets • Chokers • Long Harams",
   },
   {
     id: 4,
-    image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&w=2000&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?q=80&auto=format&fit=crop",
     title: "EVERYDAY",
     subtitle: "Charm",
     description: "Jhumkas • Studs • Delicate Chains",
