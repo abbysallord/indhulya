@@ -50,6 +50,7 @@ export const metadata: Metadata = {
 
 import SmoothScroll from "@/components/SmoothScroll";
 import dynamic from "next/dynamic";
+import { StoreProvider } from "@/context/StoreContext";
 
 const AIChatbot = dynamic(() => import("@/components/AIChatbot"));
 
@@ -78,8 +79,10 @@ export default function RootLayout({
             }),
           }}
         />
-        <SmoothScroll>{children}</SmoothScroll>
-        <AIChatbot />
+        <StoreProvider>
+          <SmoothScroll>{children}</SmoothScroll>
+          <AIChatbot />
+        </StoreProvider>
       </body>
     </html>
   );

@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, Heart, ShoppingBag, ArrowLeft } from "lucide-react";
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useStore, Product } from "@/context/StoreContext";
 
 // Using unique Unsplash IDs for a rich catalog feel
 const ALL_PRODUCTS = [
@@ -63,6 +64,7 @@ const CATEGORIES = ["All", "Necklaces", "Earrings", "Bangles", "Chokers", "Brida
 
 function ProductsContent() {
   const searchParams = useSearchParams();
+  const { addToCart, toggleWishlist, wishlist } = useStore();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("default");
@@ -238,12 +240,20 @@ function ProductsContent() {
                 {/* Hover Actions */}
                 <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors duration-300" />
                 <div className="absolute top-4 right-4 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                  <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:text-[#5C1218] transition-colors" aria-label="Toggle Wishlist">
-                    <Heart className="w-4 h-4" />
+                  <button 
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product.id); }}
+                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:text-[#5C1218] transition-colors" 
+                    aria-label="Toggle Wishlist"
+                  >
+                    <Heart className={`w-4 h-4 ${wishlist.includes(product.id) ? 'fill-[#5C1218] text-[#5C1218]' : ''}`} />
                   </button>
                 </div>
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                  <button className="w-full py-3 bg-white/95 backdrop-blur-sm text-black font-semibold text-xs tracking-widest uppercase rounded-lg shadow-lg hover:bg-[#5C1218] hover:text-white transition-colors flex items-center justify-center gap-2" aria-label="Add to Cart">
+                  <button 
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(product as Product); }}
+                    className="w-full py-3 bg-white/95 backdrop-blur-sm text-black font-semibold text-xs tracking-widest uppercase rounded-lg shadow-lg hover:bg-[#5C1218] hover:text-white transition-colors flex items-center justify-center gap-2" 
+                    aria-label="Add to Cart"
+                  >
                     <ShoppingBag className="w-4 h-4" />
                     Add to Cart
                   </button>

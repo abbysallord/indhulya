@@ -4,6 +4,7 @@ import { Search, MapPin, Heart, ShoppingBag, ChevronDown, Menu, X } from "lucide
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useStore } from "@/context/StoreContext";
 
 export default function Header() {
   const [isPincodeOpen, setIsPincodeOpen] = useState(false);
@@ -12,6 +13,8 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedPincode, setSelectedPincode] = useState("Enter Pincode");
   const router = useRouter();
+  
+  const { cartCount, wishlistCount, isMounted } = useStore();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,16 +104,20 @@ export default function Header() {
           <Link href="/products" className="md:hidden text-gray-700 hover:text-black" aria-label="Search">
              <Search className="w-5 h-5" />
           </Link>
-          <Link href="/products" className="hidden sm:block text-gray-700 hover:text-black" aria-label="Store Locator">
+          <Link href="/store-locator" className="hidden sm:block text-gray-700 hover:text-black" aria-label="Store Locator">
             <MapPin className="w-5 h-5" />
           </Link>
           <Link href="/products" className="relative text-gray-700 hover:text-black" aria-label="Wishlist">
             <Heart className="w-5 h-5" />
-            <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">0</span>
+            {isMounted && wishlistCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">{wishlistCount}</span>
+            )}
           </Link>
           <Link href="/products" className="relative text-gray-700 hover:text-black" aria-label="Shopping Cart">
             <ShoppingBag className="w-5 h-5" />
-            <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">0</span>
+            {isMounted && cartCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">{cartCount}</span>
+            )}
           </Link>
         </div>
       </div>
