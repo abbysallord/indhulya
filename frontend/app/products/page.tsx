@@ -249,16 +249,16 @@ function ProductsContent() {
                 
                 {/* Hover Actions */}
                 <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors duration-300" />
-                <div className="absolute top-4 right-4 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+                <div className="absolute top-4 right-4 translate-x-0 md:translate-x-4 opacity-100 md:opacity-0 md:group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 z-10">
                   <button 
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product as Product); }}
-                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:text-[#5C1218] transition-colors" 
+                    className="w-8 h-8 md:w-10 md:h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:text-[#5C1218] transition-colors" 
                     aria-label="Toggle Wishlist"
                   >
-                    <Heart className={`w-4 h-4 ${wishlist.some(p => p.id === product.id) ? 'fill-[#5C1218] text-[#5C1218]' : ''}`} />
+                    <Heart className={`w-3 h-3 md:w-4 md:h-4 ${wishlist.some(p => p.id === product.id) ? 'fill-[#5C1218] text-[#5C1218]' : ''}`} />
                   </button>
                 </div>
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] translate-y-0 md:translate-y-4 opacity-100 md:opacity-0 md:group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-10">
                   <button 
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(product as Product); }}
                     className="w-full py-3 bg-white/95 backdrop-blur-sm text-black font-semibold text-xs tracking-widest uppercase rounded-lg shadow-lg hover:bg-[#5C1218] hover:text-white transition-colors flex items-center justify-center gap-2" 

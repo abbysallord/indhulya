@@ -82,17 +82,17 @@ function ProductCardItem({ product, priority }: { product: Product; priority?: b
         <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors duration-300 z-10 pointer-events-none" />
         
         {/* Wishlist Button */}
-        <div className="absolute top-4 right-4 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 z-20">
+        <div className="absolute top-4 right-4 translate-x-0 md:translate-x-4 opacity-100 md:opacity-0 md:group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 z-20">
           <motion.button 
             whileTap={{ scale: 0.8 }}
             animate={wishlist.some(p => p.id === product.id) ? { scale: [1, 1.2, 1] } : {}}
             transition={{ duration: 0.3 }}
             onClick={handleWishlist}
-            className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:text-[#5C1218] transition-colors"
+            className="w-8 h-8 md:w-10 md:h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:text-[#5C1218] transition-colors"
             aria-label="Toggle Wishlist"
           >
             <Heart 
-              className={`w-4 h-4 transition-colors duration-300 ${
+              className={`w-3 h-3 md:w-4 md:h-4 transition-colors duration-300 ${
                 wishlist.some(p => p.id === product.id) ? 'fill-[#5C1218] text-[#5C1218]' : ''
               }`} 
             />
@@ -100,7 +100,7 @@ function ProductCardItem({ product, priority }: { product: Product; priority?: b
         </div>
 
         {/* Add to Bag Button */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] translate-y-0 md:translate-y-4 opacity-100 md:opacity-0 md:group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
           <button 
             onClick={handleAdd}
             className={`w-full py-3 backdrop-blur-sm font-semibold text-xs tracking-widest uppercase rounded-lg shadow-lg transition-colors flex items-center justify-center gap-2 ${

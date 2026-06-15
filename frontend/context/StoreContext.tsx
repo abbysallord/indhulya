@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export type Product = {
   id: number | string;
@@ -30,6 +31,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [deliveryLocation, setDeliveryLocation] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -78,6 +85,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = (product: Product) => {
     setCart((prev) => [...prev, product]);
+    showToast(`Added ${product.name} to your bag`);
   };
 
   const removeFromCart = (productId: number | string) => {
@@ -85,11 +93,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleWishlist = (product: Product) => {
-    setWishlist((prev) => 
-      prev.some(p => p.id === product.id) 
-        ? prev.filter(p => p.id !== product.id)
-        : [...prev, product]
-    );
+    setWishlist((prev) => {
+      const exists = prev.some(p => p.id === product.id);
+      if (exists) {
+        showToast(`Removed ${product.name} from wishlist`);
+        return prev.filter(p => p.id !== product.id);
+      } else {
+        showToast(`Added ${product.name} to wishlist`);
+        return [...prev, product];
+      }
+    });
   };
 
   return (
@@ -106,6 +119,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       isMounted
     }}>
       {children}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] bg-black/95 backdrop-blur-md text-white px-6 py-3 rounded-full shadow-2xl border border-white/10 flex items-center gap-3 w-max max-w-[90vw]"
+          >
+            <div className="w-2 h-2 rounded-full bg-[#E5B94E]" />
+            <p className="text-xs md:text-sm font-semibold tracking-wide truncate">{toastMessage}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </StoreContext.Provider>
   );
 }
