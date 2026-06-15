@@ -89,7 +89,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeFromCart = (productId: number | string) => {
-    setCart((prev) => prev.filter(p => p.id !== productId));
+    setCart((prev) => {
+      const index = prev.findIndex(p => p.id === productId);
+      if (index === -1) return prev;
+      const newCart = [...prev];
+      newCart.splice(index, 1);
+      return newCart;
+    });
   };
 
   const toggleWishlist = (product: Product) => {

@@ -71,7 +71,7 @@ export default function FAQSection() {
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full flex justify-between items-center p-6 md:px-8 bg-white/50 backdrop-blur-md rounded-2xl border border-white shadow-sm hover:bg-white/80 transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C1218] focus-visible:ring-offset-2"
+                  className="w-full flex justify-between items-center p-6 md:px-8 bg-white/90 rounded-2xl border border-white shadow-sm hover:bg-white transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C1218] focus-visible:ring-offset-2"
                 >
                   <span className={`font-medium md:text-lg transition-colors ${isOpen ? "text-[#5C1218]" : "text-gray-900"}`}>
                     {faq.question}
@@ -102,7 +102,7 @@ export default function FAQSection() {
                       <motion.div 
                         variants={{ collapsed: { y: -10 }, open: { y: 0 } }}
                         transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
-                        className="p-6 md:px-8 pt-2 pb-6 text-gray-600 leading-relaxed bg-white/30 backdrop-blur-sm rounded-b-2xl border-x border-b border-white shadow-sm -mt-4 pt-8"
+                        className="p-6 md:px-8 pt-2 pb-6 text-gray-600 leading-relaxed bg-white/80 rounded-b-2xl border-x border-b border-white shadow-sm -mt-4 pt-8"
                       >
                         {faq.answer}
                       </motion.div>
