@@ -6,7 +6,7 @@ export default function AnnouncementBar() {
   const [timeLeft, setTimeLeft] = useState({ hours: 5, minutes: 43, seconds: 21 });
 
   useEffect(() => {
-    setMounted(true);
+    const t = setTimeout(() => setMounted(true), 0);
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev.seconds > 0) {

@@ -72,20 +72,28 @@ function ProductsContent() {
   const PRODUCTS_PER_PAGE = 12;
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Safely initialize state from URL params
+  // Handle URL params
   useEffect(() => {
-    const search = searchParams.get("search");
-    if (search) {
-      // If the search term is a known category, activate the category instead of the search bar
-      const matchedCategory = CATEGORIES.find(c => c.toLowerCase() === search.toLowerCase());
-      if (matchedCategory) {
-        setSelectedCategory(matchedCategory);
+    const t = setTimeout(() => {
+      const cat = searchParams.get("category");
+      const search = searchParams.get("search");
+      
+      if (cat) {
+        setSelectedCategory(cat);
         setSearchQuery("");
-      } else {
-        setSearchQuery(search);
-        setSelectedCategory("All");
+      } else if (search) {
+        // If it's a category search (like clicking from homepage circles)
+        const matchedCategory = CATEGORIES.find(c => c.toLowerCase() === search.toLowerCase());
+        if (matchedCategory) {
+          setSelectedCategory(matchedCategory);
+          setSearchQuery("");
+        } else {
+          setSearchQuery(search);
+          setSelectedCategory("All");
+        }
       }
-    }
+    }, 0);
+    return () => clearTimeout(t);
   }, [searchParams]);
 
   // Handle conflicts: clicking a category clears search, typing a search clears category
@@ -127,7 +135,8 @@ function ProductsContent() {
 
   // Reset pagination when sortBy changes
   useEffect(() => {
-    setCurrentPage(1);
+    const t = setTimeout(() => setCurrentPage(1), 0);
+    return () => clearTimeout(t);
   }, [sortBy]);
 
   const paginatedProducts = filteredProducts.slice(

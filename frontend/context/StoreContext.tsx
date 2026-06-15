@@ -29,15 +29,32 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    try {
-      const savedCart = localStorage.getItem("indhulya_cart");
-      const savedWishlist = localStorage.getItem("indhulya_wishlist");
-      if (savedCart) setCart(JSON.parse(savedCart));
-      if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
-    } catch (error) {
-      console.error("Could not load from localStorage", error);
-    }
+    const t = setTimeout(() => {
+      setIsMounted(true);
+      try {
+        const savedCart = localStorage.getItem("indhulya_cart");
+        const savedWishlist = localStorage.getItem("indhulya_wishlist");
+        if (savedCart) {
+          const parsed = JSON.parse(savedCart);
+          if (Array.isArray(parsed) && (parsed.length === 0 || typeof parsed[0] === 'object')) {
+            setCart(parsed);
+          } else {
+            localStorage.removeItem("indhulya_cart");
+          }
+        }
+        if (savedWishlist) {
+          const parsed = JSON.parse(savedWishlist);
+          if (Array.isArray(parsed) && (parsed.length === 0 || typeof parsed[0] === 'object')) {
+            setWishlist(parsed);
+          } else {
+            localStorage.removeItem("indhulya_wishlist");
+          }
+        }
+      } catch (error) {
+        console.error("Could not load from localStorage", error);
+      }
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   useEffect(() => {
