@@ -111,7 +111,7 @@ export default function Header() {
               alt="Indhulya Logo" 
               width={280} 
               height={80} 
-              className="object-contain hover:opacity-80 transition-opacity h-auto w-auto max-h-[40px] md:max-h-[60px]" 
+              className="object-contain hover:opacity-80 transition-opacity h-auto w-auto max-h-[40px] md:max-h-[60px] invert" 
               priority
             />
           </Link>
