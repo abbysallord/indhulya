@@ -1,13 +1,22 @@
 "use client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { MapPin, Phone, Clock } from "lucide-react";
+import { MapPin, Phone, Clock, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function StoreLocator() {
   return (
     <div className="flex flex-col min-h-screen bg-[#FDFCFB]">
       <Header />
-      <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 md:px-8 py-20 pt-32">
+      <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 md:px-8 py-8 md:py-16 pt-32">
+        {/* Back Navigation */}
+        <div className="mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 text-gray-500 hover:text-[#5C1218] transition-colors text-sm font-semibold tracking-wide uppercase">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
+          </Link>
+        </div>
+
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-serif text-[#5C1218] mb-4">Our Boutiques</h1>
           <p className="text-gray-600 max-w-xl mx-auto">Experience the pristine luxury of Indhulya in person. Visit our exclusive boutiques for a personalized viewing.</p>

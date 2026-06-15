@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Heart, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useStore, Product as StoreProduct } from "@/context/StoreContext";
 
 type Product = {
   id: string;
@@ -21,17 +22,26 @@ type ProductGridProps = {
 };
 
 function ProductCardItem({ product, priority }: { product: Product; priority?: boolean }) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { addToCart, toggleWishlist, wishlist } = useStore();
   const [isAdded, setIsAdded] = useState(false);
 
   const handleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+    toggleWishlist(product.id);
   };
 
   const handleAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     setIsAdded(true);
+    addToCart({ 
+      id: product.id, 
+      name: product.name, 
+      price: product.price, 
+      image: product.image,
+      originalPrice: product.originalPrice
+    });
     setTimeout(() => setIsAdded(false), 2000); // Revert after 2 seconds
   };
 
@@ -69,7 +79,7 @@ function ProductCardItem({ product, priority }: { product: Product; priority?: b
         <div className="absolute top-4 right-4 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 z-20">
           <motion.button 
             whileTap={{ scale: 0.8 }}
-            animate={isWishlisted ? { scale: [1, 1.2, 1] } : {}}
+            animate={wishlist.includes(product.id) ? { scale: [1, 1.2, 1] } : {}}
             transition={{ duration: 0.3 }}
             onClick={handleWishlist}
             className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:text-[#5C1218] transition-colors"
@@ -77,7 +87,7 @@ function ProductCardItem({ product, priority }: { product: Product; priority?: b
           >
             <Heart 
               className={`w-4 h-4 transition-colors duration-300 ${
-                isWishlisted ? 'fill-[#5C1218] text-[#5C1218]' : ''
+                wishlist.includes(product.id) ? 'fill-[#5C1218] text-[#5C1218]' : ''
               }`} 
             />
           </motion.button>

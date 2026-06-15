@@ -2,18 +2,19 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 export type Product = {
-  id: number;
+  id: number | string;
   name: string;
-  price: string;
+  price: string | number;
   image: string;
-  category: string;
+  category?: string;
+  originalPrice?: number;
 };
 
 type StoreContextType = {
   cart: Product[];
-  wishlist: number[]; // Store IDs of wishlisted items
+  wishlist: (number | string)[]; // Store IDs of wishlisted items
   addToCart: (product: Product) => void;
-  toggleWishlist: (productId: number) => void;
+  toggleWishlist: (productId: number | string) => void;
   cartCount: number;
   wishlistCount: number;
   isMounted: boolean;
@@ -23,7 +24,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<Product[]>([]);
-  const [wishlist, setWishlist] = useState<number[]>([]);
+  const [wishlist, setWishlist] = useState<(number | string)[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -49,7 +50,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setCart((prev) => [...prev, product]);
   };
 
-  const toggleWishlist = (productId: number) => {
+  const toggleWishlist = (productId: number | string) => {
     setWishlist((prev) => 
       prev.includes(productId) 
         ? prev.filter(id => id !== productId)
