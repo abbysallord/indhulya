@@ -4,6 +4,8 @@ import Footer from "@/components/Footer";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function OurStoryPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -18,6 +20,14 @@ export default function OurStoryPage() {
       <Header />
       
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 md:px-8 py-24 md:py-32 pt-32">
+        {/* Back Button */}
+        <div className="mb-8 md:mb-12">
+          <Link href="/" className="inline-flex items-center text-xs font-semibold tracking-widest uppercase text-gray-500 hover:text-[#5C1218] transition-colors group p-2 -ml-2">
+            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+            Back to Home
+          </Link>
+        </div>
+
         {/* Hero Section */}
         <div className="flex flex-col items-center justify-center text-center mb-16 md:mb-24">
           <motion.h1 
