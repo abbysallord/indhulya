@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     RAG_ENABLE_SYNONYM_EXPANSION: bool = True
     RAG_ENABLE_QUERY_CLASSIFICATION: bool = True
     
+    # Database configuration
+    DATABASE_URL: str = "sqlite:///./indhulya.db"
+
     # CORS config
     ALLOWED_ORIGINS: List[str] = ["*"]
     

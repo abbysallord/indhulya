@@ -6,6 +6,11 @@ from app.core.config import PROJECT_NAME, API_V1_STR
 from app.core.settings import settings
 from app.core.limiter import limiter
 from app.api.routes import chat, health, auth
+from app.db.database import Base, engine
+from app.db import models
+
+# Ensure database tables are created
+Base.metadata.create_all(bind=engine)
 
 # Create the FastAPI app instance
 app = FastAPI(
