@@ -3,10 +3,82 @@ import { useState } from "react";
 import { Mail, Lock, User, ArrowRight, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
+  const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccessMsg(null);
+
+    if (!email || !password || (isSignUp && !fullName)) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const endpoint = isSignUp ? "/chat/register" : "/auth/login"; // Check backend mount prefixes: mount `/chat` for router.include_router or check route prefixes
+    // Wait! Let's check backend mount prefix in main.py:
+    // app.include_router(auth.router, prefix="/auth", tags=["Auth"])
+    // So endpoint is '/auth/login' or '/auth/register' depending on where they are registered.
+    // Wait, let's verify where `/register` is mounted. In main.py:
+    // app.include_router(auth.router, prefix="/auth", tags=["Auth"])
+    // And in auth.py:
+    // @router.post("/register")
+    // So the endpoint is `/auth/register`!
+    const targetEndpoint = isSignUp ? "/auth/register" : "/auth/login";
+    
+    const body = isSignUp 
+      ? { full_name: fullName, email, password }
+      : { email, password };
+
+    try {
+      setLoading(true);
+      const res = await fetch(`${backendUrl}${targetEndpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || "Authentication failed");
+      }
+
+      if (isSignUp) {
+        setIsSignUp(false);
+        setFullName("");
+        setPassword("");
+        setSuccessMsg("Account created successfully! Please sign in.");
+      } else {
+        localStorage.setItem("indhulya_auth_token", data.access_token);
+        localStorage.setItem("indhulya_auth_email", data.user_email);
+        localStorage.setItem("indhulya_auth_user_id", data.user_id);
+        
+        // Trigger storage event so that Header/Navbar state refreshes instantly
+        window.dispatchEvent(new Event("storage"));
+        
+        router.push("/");
+      }
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen w-full relative flex items-center justify-center overflow-hidden bg-[#F7F7F7]">
@@ -32,7 +104,7 @@ export default function AuthPage() {
         <div className="absolute inset-0 bg-white/60 backdrop-blur-2xl border border-white rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.05)]" />
         
         <div className="relative z-20">
-          <div className="text-center mb-10">
+          <div className="text-center mb-6">
             <h1 className="text-3xl font-serif text-[#5C1218] mb-2 tracking-wide">
               {isSignUp ? "Create Account" : "Welcome Back"}
             </h1>
@@ -43,7 +115,19 @@ export default function AuthPage() {
             </p>
           </div>
 
-          <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-semibold text-center leading-relaxed">
+              {error}
+            </div>
+          )}
+
+          {successMsg && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-600 rounded-xl text-xs font-semibold text-center leading-relaxed">
+              {successMsg}
+            </div>
+          )}
+
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <AnimatePresence initial={false}>
               {isSignUp && (
                 <motion.div
@@ -60,6 +144,9 @@ export default function AuthPage() {
                     <input 
                       type="text" 
                       placeholder="John Doe"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      disabled={loading}
                       className="w-full pl-11 pr-4 py-3.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#5C1218] focus:border-[#5C1218] transition-all shadow-sm"
                     />
                   </div>
@@ -74,6 +161,9 @@ export default function AuthPage() {
                 <input 
                   type="email" 
                   placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
                   className="w-full pl-11 pr-4 py-3.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#5C1218] focus:border-[#5C1218] transition-all shadow-sm"
                 />
               </div>
@@ -93,6 +183,9 @@ export default function AuthPage() {
                 <input 
                   type="password" 
                   placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
                   className="w-full pl-11 pr-4 py-3.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#5C1218] focus:border-[#5C1218] transition-all shadow-sm"
                 />
               </div>
@@ -102,9 +195,10 @@ export default function AuthPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full bg-[#5C1218] text-white py-4 rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-[#70161E] transition-colors flex items-center justify-center gap-2 mt-8 shadow-md"
+              disabled={loading}
+              className="w-full bg-[#5C1218] text-white py-4 rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-[#70161E] transition-colors flex items-center justify-center gap-2 mt-8 shadow-md disabled:opacity-50"
             >
-              {isSignUp ? "Create Account" : "Sign In"}
+              {loading ? "Please wait..." : (isSignUp ? "Create Account" : "Sign In")}
               <ArrowRight className="w-4 h-4" />
             </motion.button>
           </form>
@@ -112,7 +206,11 @@ export default function AuthPage() {
           <div className="mt-8 text-center text-xs font-semibold text-gray-500 tracking-wider uppercase">
             {isSignUp ? "Already a member?" : "New to Indhulya?"}{" "}
             <button 
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError(null);
+                setSuccessMsg(null);
+              }}
               className="text-[#5C1218] hover:underline transition-colors ml-1 font-bold"
             >
               {isSignUp ? "Sign In" : "Sign Up"}
