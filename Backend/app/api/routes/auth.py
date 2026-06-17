@@ -6,6 +6,7 @@ from app.db import queries
 from app.core.config import logger
 from app.core.settings import settings
 from app.core.limiter import limiter
+from app.utils.security import hash_password, verify_password
 
 router = APIRouter()
 
@@ -22,7 +23,8 @@ def login_endpoint(request: Request, login_data: LoginRequest):
         logger.info(f"Attempting local database validation for email: {email}")
         user = queries.get_user_profile_by_email(email)
         
-        if not user or user.get("password") != password:
+        # Verify the password using bcrypt comparison
+        if not user or not verify_password(password, user.get("password", "")):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Authentication failed. Invalid email or password."
@@ -65,13 +67,15 @@ def register_endpoint(request: Request, reg_data: RegisterRequest):
                 detail="Email address already registered."
             )
             
-        # Create a new local user UUID and save
+        # Create a new local user UUID, hash the password, and save
         user_id = str(uuid.uuid4())
+        hashed_password = hash_password(password)
+        
         profile = queries.create_user_profile(
             user_id=user_id,
             email=email,
             full_name=full_name,
-            password=password
+            password=hashed_password
         )
         
         if not profile:
