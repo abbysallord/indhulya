@@ -237,10 +237,9 @@ class StateService:
         else:
             purchase_intent = has_active_purchase_intent or context.get("purchase_intent", False)
         
-        # Force LEAD_CAPTURE state if there is strong purchase intent and missing details for guests
+        # Force LEAD_CAPTURE state if there is strong purchase intent for guests
         if purchase_intent and is_guest:
-            if not existing_lead.get("name") or not existing_lead.get("phone"):
-                detected_state = "LEAD_CAPTURE"
+            detected_state = "LEAD_CAPTURE"
         
         # If recommendation is requested, verify if sufficient details exist
         if detected_state in ["RECOMMENDATION", "DISCOVERY"]:
@@ -396,6 +395,16 @@ class StateService:
                     turns.append(h.get("content", ""))
         turns.append(user_message)
         
+        # Define keywords for purchase intent checks
+        buy_keywords = [
+            "buy", "purchase", "order", "checkout", "add to cart", "get this", "want this",
+            "price", "cost", "how much", "rate", "price range",
+            "custom", "customize", "customization", "personalize", "made to order",
+            "contact", "call", "phone", "email", "callback", "reach out",
+            "visit", "store", "location", "address", "where is", "physical store"
+        ]
+        compare_keywords = ["compare", "vs", "difference", "better than", "contrast"]
+        
         for t in turns:
             msg_clean = t.lower().strip()
             
@@ -457,7 +466,26 @@ class StateService:
                     if first_word.isalpha() and first_word.lower() not in ["hi", "hello", "my", "i", "here"]:
                         accumulated_lead["name"] = first_word.capitalize()
                         
-        # 2. Extract purchase intent and state ONLY from the current user_message
+        # 2. Chronologically compute purchase intent across turns to reconstruct state machine context
+        purchase_intent = False
+        for t in turns:
+            msg_clean = t.lower().strip()
+            has_buy = any(kw in msg_clean for kw in buy_keywords) or any(kw in msg_clean for kw in compare_keywords)
+            
+            has_phone = bool(re.search(r"\b\d{10,12}\b", msg_clean))
+            has_name = bool(re.search(r"(?:my name is|i am|call me)\s+([a-z]+)", msg_clean))
+            is_providing_details = has_phone or has_name
+            
+            query_type = QueryClassifier.classify(t)
+            
+            if (query_type in ["GREETING", "POLICY", "FAQ", "GENERAL"] and not is_providing_details) or (
+                query_type == "PRODUCT" and not has_buy and not is_providing_details
+            ):
+                purchase_intent = False
+            elif has_buy or is_providing_details:
+                purchase_intent = True
+                
+        # 3. Final classification based on the last message intent
         msg_last_clean = user_message.lower().strip()
         query_type = QueryClassifier.classify(user_message)
         
@@ -468,25 +496,10 @@ class StateService:
             state = "POLICY"
         elif query_type in ["FAQ", "GENERAL"]:
             state = "FAQ"
-        elif any(kw in msg_last_clean for kw in ["compare", "vs", "difference", "better than"]):
+        elif any(kw in msg_last_clean for kw in compare_keywords):
             state = "COMPARISON"
             
-        purchase_intent = False
-        buy_keywords = [
-            "buy", "purchase", "order", "checkout", "add to cart", "get this", "want this",
-            "price", "cost", "how much", "rate", "price range",
-            "custom", "customize", "customization", "personalize", "made to order",
-            "contact", "call", "phone", "email", "callback", "reach out",
-            "visit", "store", "location", "address", "where is", "physical store"
-        ]
-        
-        if any(kw in msg_last_clean for kw in buy_keywords):
-            purchase_intent = True
-            state = "LEAD_CAPTURE"
-            
-        compare_keywords = ["compare", "vs", "difference", "better than", "contrast"]
-        if any(kw in msg_last_clean for kw in compare_keywords):
-            purchase_intent = True
+        if purchase_intent:
             state = "LEAD_CAPTURE"
             
         return {
