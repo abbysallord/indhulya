@@ -21,3 +21,10 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# Dynamically import models to register with Base and create tables automatically
+try:
+    from app.db import models
+    Base.metadata.create_all(bind=engine)
+except Exception:
+    pass

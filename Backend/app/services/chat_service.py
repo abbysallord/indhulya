@@ -19,7 +19,7 @@ from app.services.lead_service import LeadService
 
 class ChatService:
     @staticmethod
-    def process_chat(request: ChatRequest, user: Optional[Any]) -> ChatResponse:
+    def process_chat(request: ChatRequest, user_id: Optional[Any]) -> ChatResponse:
         """
         Orchestrates chat messages for both authenticated and guest users:
         1. Resolve user details and session (DB or In-Memory)
@@ -39,15 +39,16 @@ class ChatService:
         
         # Open database session context for SQLAlchemy operations
         with SessionLocal() as db:
-            # Resolve user details supporting unit tests (which pass string UUIDs)
-            if isinstance(user, str):
-                user_id = user
+            # Resolve user details supporting unit tests (which pass string UUIDs or user objects)
+            user_obj = user_id
+            if isinstance(user_obj, str):
+                user_id = user_obj
                 user_email = "test@example.com"
                 user_metadata = {"name": "Test User"}
-            elif user:
-                user_id = getattr(user, "id", None)
-                user_email = getattr(user, "email", "guest@example.com")
-                user_metadata = getattr(user, "user_metadata", {}) or {}
+            elif user_obj:
+                user_id = getattr(user_obj, "id", None)
+                user_email = getattr(user_obj, "email", "guest@example.com")
+                user_metadata = getattr(user_obj, "user_metadata", {}) or {}
             else:
                 user_id = None
                 user_email = None
@@ -102,8 +103,10 @@ class ChatService:
                 scored_products = RecommendationService.score_and_rank_products(current_slots)
                 # Log recommendation to recommendation_history table
                 RecommendationService.save_recommendation_history(db, session_id, user_id, user_message, scored_products)
+                # Build recommendation prompt
+                messages = RecommendationService.build_recommendation_prompt(current_slots, scored_products)
                 # Generate explanation response grounded with exact ranked items
-                assistant_reply = RecommendationService.generate_recommendation_response(current_slots, scored_products)
+                assistant_reply = llm_service.generate_chat_response(messages)
 
             elif active_state == "LEAD_CAPTURE":
                 if not is_guest:

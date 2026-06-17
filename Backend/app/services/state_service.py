@@ -44,6 +44,8 @@ class StateService:
         """
         Commits conversation state changes to the database.
         """
+        from sqlalchemy.orm.attributes import flag_modified
+        flag_modified(state_record, "context_data")
         db.add(state_record)
         db.commit()
 
@@ -73,6 +75,11 @@ class StateService:
         """
         Commits user preferences changes to the database.
         """
+        from sqlalchemy.orm.attributes import flag_modified
+        flag_modified(pref, "preferred_materials")
+        flag_modified(pref, "preferred_categories")
+        flag_modified(pref, "occasions")
+        flag_modified(pref, "style_preferences")
         db.add(pref)
         db.commit()
 
@@ -360,9 +367,9 @@ class StateService:
             state = "GREETING"
         elif query_type == "POLICY":
             state = "POLICY"
-        elif query_type == "FAQ":
+        elif query_type == "FAQ" or query_type == "GENERAL":
             state = "FAQ"
-        elif query_type == "COLLECTION" or query_type == "MATERIAL" or query_type == "PRODUCT":
+        elif query_type in ["COLLECTION", "MATERIAL", "PRODUCT"]:
             state = "DISCOVERY"
             
         # Check comparison keywords
@@ -371,10 +378,10 @@ class StateService:
             
         # Detect slots
         category = None
-        if "ring" in msg_clean or "band" in msg_clean:
-            category = "Ring"
-        elif "earring" in msg_clean or "stud" in msg_clean:
+        if "earring" in msg_clean or "stud" in msg_clean:
             category = "Earrings"
+        elif "ring" in msg_clean or "band" in msg_clean:
+            category = "Ring"
         elif "necklace" in msg_clean or "chain" in msg_clean or "pendant" in msg_clean:
             category = "Necklace"
             
@@ -426,17 +433,20 @@ class StateService:
         phone_match = re.search(r"\b\d{10,12}\b", msg_clean)
         if phone_match:
             phone = phone_match.group(0)
-            # Try to grab name: if they said "my name is Vicky" or "Vicky, 1234567890"
-            name_match = re.search(r"(?:my name is|i am|call me)\s+([a-z]+)", msg_clean)
-            if name_match:
-                name = name_match.group(1).capitalize()
-            else:
-                # Fallback: take first word if simple
-                words = user_message.split()
-                if len(words) > 0 and words[0].isalpha() and words[0].lower() not in ["hi", "hello", "my", "i", "here"]:
-                    name = words[0]
+            
+        # Extract name if they explicitly introduced themselves (e.g. "my name is Vicky" or "i am Vicky")
+        name_match = re.search(r"(?:my name is|i am|call me)\s+([a-z]+)", msg_clean)
+        if name_match:
+            name = name_match.group(1).capitalize()
+        elif phone_match:
+            # Fallback: take first word if simple and phone is present
+            words = user_message.split()
+            if len(words) > 0:
+                first_word = words[0].strip(",.!?;:")
+                if first_word.isalpha() and first_word.lower() not in ["hi", "hello", "my", "i", "here"]:
+                    name = first_word.capitalize()
                     
-        if name or phone:
+        if phone:
             state = "LEAD_CAPTURE"
 
         return {

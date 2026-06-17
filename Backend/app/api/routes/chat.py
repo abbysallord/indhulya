@@ -23,8 +23,7 @@ def chat_endpoint(request: Request, chat_req: ChatRequest, user = Depends(get_op
     Supports both authenticated and anonymous guest requests.
     """
     try:
-        user_id = user.id if user else None
-        return ChatService.process_chat(chat_req, user_id)
+        return ChatService.process_chat(chat_req, user)
     except HTTPException as he:
         raise he
     except Exception as e:

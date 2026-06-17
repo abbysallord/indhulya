@@ -130,17 +130,24 @@ class RecommendationService:
             logger.error(f"Failed to save recommendation history: {str(e)}")
 
     @classmethod
-    def generate_recommendation_response(cls, slots: dict, scored_products: List[dict]) -> str:
+    def build_recommendation_prompt(cls, slots: dict, scored_products: List[dict]) -> List[Dict[str, str]]:
         """
-        Generates an LLM presentation of the selected products, grounding Groq to explain them.
+        Builds the prompt messages list for Groq, grounding it to explain the deterministic recommendations.
         """
-        top_matches = scored_products[:3]
+        top_matches = [p for p in scored_products if p["score"] > 0][:3]
         
-        # If no products matched or scores are too low, explain gracefully
-        if not top_matches or all(p["score"] <= 0 for p in top_matches):
-            return "I searched our catalog, but I couldn't find any products matching your specific constraints. Would you like to adjust your budget or try another metal?"
+        # If no products matched or scores are too low, return a direct message prompt
+        if not top_matches:
+            system_content = (
+                "You are a sales assistant for Indhulya jewelry. The recommendation system did not find any matching products.\n"
+                "Politely inform the user that no direct matches were found in our catalog, and ask if they would like to adjust their budget or try another metal."
+            )
+            return [
+                {"role": "system", "content": system_content},
+                {"role": "user", "content": "Inform me that no matches were found."}
+            ]
 
-        # Format details of recommended products for system prompt
+        # Format details of recommended products
         context_products = []
         for idx, item in enumerate(top_matches):
             p = item["product"]
@@ -172,9 +179,7 @@ class RecommendationService:
             "4. Keep the response helpful, engaging, and professional."
         )
         
-        messages = [
+        return [
             {"role": "system", "content": system_content},
             {"role": "user", "content": "Explain why these products match my preferences and present them to me."}
         ]
-        
-        return llm_service.generate_chat_response(messages)
