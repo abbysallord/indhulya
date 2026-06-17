@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Request
+import uuid
 from app.schemas.auth import LoginRequest, LoginResponse, RegisterRequest, RegisterResponse
 from app.db.supabase import supabase
 from app.db import queries
@@ -12,123 +13,84 @@ router = APIRouter()
 @limiter.limit("10/minute")
 def login_endpoint(request: Request, login_data: LoginRequest):
     """
-    Authenticates a user using Supabase Auth.
-    Falls back to a mock authentication if Supabase is not configured (for local development).
+    Authenticates a user by checking their credentials against the public.profiles database table.
     """
     email = login_data.email.lower().strip()
     password = login_data.password
     
-    # Check if Supabase client is configured
-    is_supabase_configured = (
-        supabase is not None 
-        and settings.SUPABASE_URL != "https://placeholder-url.supabase.co"
-        and getattr(settings, "SUPABASE_ANON_KEY", "placeholder-anon-key") != "placeholder-anon-key"
-    )
-    
-    if is_supabase_configured:
-        try:
-            logger.info(f"Attempting Supabase auth sign-in for email: {email}")
-            auth_response = supabase.auth.sign_in_with_password({
-                "email": email,
-                "password": password
-            })
-            
-            session = auth_response.session
-            user = auth_response.user
-            
-            if not session or not user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Authentication failed. Invalid email or password."
-                )
-                
-            return LoginResponse(
-                access_token=session.access_token,
-                token_type="bearer",
-                user_id=user.id,
-                user_email=user.email
-            )
-            
-        except Exception as e:
-            logger.error(f"Supabase auth error for {email}: {str(e)}")
+    try:
+        logger.info(f"Attempting local database validation for email: {email}")
+        user = queries.get_user_profile_by_email(email)
+        
+        if not user or user.get("password") != password:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Authentication failed: {str(e)}"
+                detail="Authentication failed. Invalid email or password."
             )
-    else:
-        logger.error(f"Supabase not configured. Rejecting login attempt for {email}")
+            
+        return LoginResponse(
+            access_token=f"mock_token_{user['id']}",
+            token_type="bearer",
+            user_id=user["id"],
+            user_email=user["email"]
+        )
+        
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logger.error(f"Local auth login error for {email}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Authentication service is not configured."
+            detail=f"Authentication error: {str(e)}"
         )
 
 @router.post("/register", response_model=RegisterResponse)
 @limiter.limit("10/minute")
 def register_endpoint(request: Request, reg_data: RegisterRequest):
     """
-    Registers a user using Supabase Auth and logs their details in the profiles table.
+    Registers a user by saving their credentials directly in the public.profiles table.
     """
     full_name = reg_data.full_name.strip()
     email = reg_data.email.lower().strip()
     password = reg_data.password
     
-    # Check if Supabase client is configured
-    is_supabase_configured = (
-        supabase is not None 
-        and settings.SUPABASE_URL != "https://placeholder-url.supabase.co"
-        and getattr(settings, "SUPABASE_ANON_KEY", "placeholder-anon-key") != "placeholder-anon-key"
-    )
-    
-    if not is_supabase_configured:
-        logger.error(f"Supabase not configured. Rejecting registration attempt for {email}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Authentication service is not configured."
-        )
-        
     try:
-        logger.info(f"Attempting Supabase registration for email: {email}")
-        # Sign up the user in Supabase Auth
-        auth_response = supabase.auth.sign_up({
-            "email": email,
-            "password": password,
-            "options": {
-                "data": {
-                    "full_name": full_name
-                }
-            }
-        })
+        logger.info(f"Attempting local database signup for email: {email}")
         
-        user = auth_response.user
-        if not user:
+        # Check if email is already registered
+        existing_user = queries.get_user_profile_by_email(email)
+        if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Registration failed. Could not create user account."
+                detail="Email address already registered."
             )
             
-        # Create public profile log
-        try:
-            profile = queries.create_user_profile(
-                user_id=user.id,
-                email=email,
-                full_name=full_name
+        # Create a new local user UUID and save
+        user_id = str(uuid.uuid4())
+        profile = queries.create_user_profile(
+            user_id=user_id,
+            email=email,
+            full_name=full_name,
+            password=password
+        )
+        
+        if not profile:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Registration failed. Could not create database profile record."
             )
-            if not profile:
-                logger.warning(f"Registration succeeded but public profile row was not created for user {user.id}")
-        except Exception as profile_err:
-            logger.error(f"Error creating public profile row for user {user.id}: {str(profile_err)}")
-            # We don't fail the registration if the profile fails (e.g. database trigger already created it)
             
         return RegisterResponse(
-            user_id=user.id,
-            user_email=user.email,
+            user_id=profile["id"],
+            user_email=profile["email"],
             message="User successfully registered."
         )
         
+    except HTTPException as he:
+        raise he
     except Exception as e:
-        logger.error(f"Supabase registration error for {email}: {str(e)}")
+        logger.error(f"Local auth registration error for {email}: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Registration failed: {str(e)}"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Registration error: {str(e)}"
         )
-

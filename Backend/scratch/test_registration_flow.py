@@ -8,17 +8,15 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from app.db.supabase import supabase
-from supabase import create_client
 
 def main():
     backend_url = "http://localhost:8000"
-    email = f"vicky_test_{uuid.uuid4().hex[:8]}@example.com"
-    password = "SuperSecurePassword123!"
-    full_name = "Vicky Verification"
+    random_suffix = uuid.uuid4().hex[:6]
+    email = f"vicky.test.local+{random_suffix}@gmail.com"
+    password = "MySecurePassword123!"
+    full_name = "Vicky Custom Auth"
     
-    print(f"Testing registration API with email: {email}...")
-    
-    # 1. Sign up the user via the API endpoint
+    print(f"--- 1. Testing Registration API ({email}) ---")
     payload = {
         "full_name": full_name,
         "email": email,
@@ -27,48 +25,54 @@ def main():
     
     try:
         r = requests.post(f"{backend_url}/auth/register", json=payload)
-        print("Registration Response Status:", r.status_code)
-        print("Registration Response Data:", r.json())
+        print("Registration Status:", r.status_code)
+        print("Registration Response:", r.json())
         r.raise_for_status()
-        res_data = r.json()
-        user_id = res_data.get("user_id")
+        user_id = r.json().get("user_id")
     except Exception as e:
         print("Error calling register API:", str(e))
         return
         
-    print("\n1. Verifying if profile record was created in Supabase 'profiles' table via Admin (Service Role) client...")
+    print(f"\n--- 2. Testing Login API ({email}) ---")
+    login_payload = {
+        "email": email,
+        "password": password
+    }
     try:
-        response = supabase.table("profiles").select("*").eq("id", user_id).execute()
-        profile_data = response.data
-        if len(profile_data) > 0:
-            print("SUCCESS! Public profile row created:")
-            print(profile_data[0])
-        else:
-            print("FAILED! Public profile row was NOT found in Supabase.")
+        r = requests.post(f"{backend_url}/auth/login", json=login_payload)
+        print("Login Status:", r.status_code)
+        print("Login Response:", r.json())
+        r.raise_for_status()
+        token = r.json().get("access_token")
     except Exception as e:
-        print("Error querying profiles via Admin:", str(e))
+        print("Error calling login API:", str(e))
+        return
         
-    print("\n2. Verifying RLS: Attempting to query the new profile using an unauthenticated/anonymous client...")
+    print(f"\n--- 3. Testing Authenticated Route with Mock Token ({token}) ---")
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    session_payload = {
+        "title": "Test Auth Session"
+    }
     try:
-        from app.core.settings import settings
-        anon_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
-        # Attempt to read all profiles (should be blocked by RLS)
-        response_anon = anon_client.table("profiles").select("*").execute()
-        print(f"RLS Query Response count: {len(response_anon.data)}")
-        
-        # Verify that we can't see profiles of other users
-        # Under RLS, anon read should return empty list or fail.
-        if len(response_anon.data) == 0:
-            print("SUCCESS! RLS blocked unauthenticated access (returned 0 rows).")
-        else:
-            # Check if we could read the one we just inserted or other users
-            matching = [p for p in response_anon.data if p['id'] == user_id]
-            if matching:
-                print("WARNING! RLS did NOT block unauthenticated access! We could read our profile:", matching[0])
-            else:
-                print("SUCCESS! RLS blocked reading our profile, but got other rows:", len(response_anon.data))
+        r = requests.post(f"{backend_url}/chat/sessions", json=session_payload, headers=headers)
+        print("Create Session Status:", r.status_code)
+        print("Create Session Response:", r.json())
+        r.raise_for_status()
+        session_id = r.json().get("id")
+        print("SUCCESS! Created authenticated session successfully!")
     except Exception as e:
-        print("Anonymous query failed (as expected if RLS blocked it completely):", str(e))
+        print("Error calling authenticated endpoint:", str(e))
+        print("This is expected if the 'profiles' or 'chat_sessions' table hasn't been created on Supabase yet.")
+        return
+
+    # Cleanup the test session (optional)
+    try:
+        r = requests.delete(f"{backend_url}/chat/sessions/{session_id}", headers=headers)
+        print("Cleanup session response:", r.status_code)
+    except Exception as e:
+        print("Cleanup failed:", str(e))
 
 if __name__ == "__main__":
     main()

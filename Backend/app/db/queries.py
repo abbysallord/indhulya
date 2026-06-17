@@ -197,7 +197,7 @@ def save_recommendation_history(
         logger.error(f"[DB-Query] Error saving recommendation history: {str(e)}")
     return None
 
-def create_user_profile(user_id: str, email: str, full_name: str) -> Optional[Dict[str, Any]]:
+def create_user_profile(user_id: str, email: str, full_name: str, password: str) -> Optional[Dict[str, Any]]:
     """
     Creates a new public user profile in the database.
     Table: profiles
@@ -209,7 +209,8 @@ def create_user_profile(user_id: str, email: str, full_name: str) -> Optional[Di
         payload = {
             "id": user_id,
             "email": email,
-            "full_name": full_name
+            "full_name": full_name,
+            "password": password
         }
         response = supabase.table("profiles").insert(payload).execute()
         if response.data:
@@ -217,4 +218,35 @@ def create_user_profile(user_id: str, email: str, full_name: str) -> Optional[Di
     except Exception as e:
         logger.error(f"[DB-Query] Error creating user profile: {str(e)}")
     return None
+
+def get_user_profile_by_email(email: str) -> Optional[Dict[str, Any]]:
+    """
+    Retrieves user profile by email from public.profiles.
+    """
+    logger.info(f"[DB-Query] Fetching user profile for email {email}")
+    if not supabase:
+        return None
+    try:
+        response = supabase.table("profiles").select("*").eq("email", email).execute()
+        if response.data:
+            return response.data[0]
+    except Exception as e:
+        logger.error(f"[DB-Query] Error fetching user profile by email: {str(e)}")
+    return None
+
+def get_user_profile_by_id(user_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Retrieves user profile by ID from public.profiles.
+    """
+    logger.info(f"[DB-Query] Fetching user profile for ID {user_id}")
+    if not supabase:
+        return None
+    try:
+        response = supabase.table("profiles").select("*").eq("id", user_id).execute()
+        if response.data:
+            return response.data[0]
+    except Exception as e:
+        logger.error(f"[DB-Query] Error fetching user profile by id: {str(e)}")
+    return None
+
 
