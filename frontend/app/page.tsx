@@ -13,6 +13,7 @@ const FlashyShowcase = dynamic(() => import("@/components/FlashyShowcase"));
 const EditorialSection = dynamic(() => import("@/components/EditorialSection"));
 const FAQSection = dynamic(() => import("@/components/FAQSection"));
 const ContactSection = dynamic(() => import("@/components/ContactSection"));
+const TrustIndicators = dynamic(() => import("@/components/TrustIndicators"));
 
 const topStylesProducts = [
   {
@@ -127,6 +128,7 @@ export default function Home() {
         <FlashyShowcase />
         <div id="occasions"><CardSlider title="For Every Occasion" cards={occasionCards} aspectRatio="square" /></div>
         <div id="editorial"><EditorialSection /></div>
+        <TrustIndicators />
         <div id="faq"><FAQSection /></div>
         <div id="contact"><ContactSection /></div>
       </main>
