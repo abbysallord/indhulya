@@ -2,8 +2,6 @@ import json
 import uuid
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-from sqlalchemy.orm import Session
-from app.db.models import RecommendationHistory
 from app.core.config import logger
 from app.services.llm_service import llm_service
 
@@ -105,27 +103,29 @@ class RecommendationService:
 
     @staticmethod
     def save_recommendation_history(
-        db: Session, session_id: str, user_id: Optional[str], query: str, scored_products: List[dict]
+        session_id: str, user_id: Optional[str], query: str, scored_products: List[dict]
     ):
         """
-        Persists a trace of the algorithmic suggestion list into the database.
+        Persists a trace of the algorithmic suggestion list into the database for authenticated users only.
+        Guest recommendation history is saved later only if a lead is captured.
         """
-        try:
-            # Save top 3 suggested products
-            top_products = [p["product"]["id"] for p in scored_products[:3]]
-            scores_dict = {p["product"]["id"]: p["score"] for p in scored_products[:3]}
+        if not user_id:
+            logger.info(f"Skipping immediate recommendation logging for guest session {session_id}.")
+            return
             
-            history_record = RecommendationHistory(
-                id=str(uuid.uuid4()),
+        try:
+            top_products = [p["product"]["id"] for p in scored_products[:3]]
+            scores_dict = {p["product"]["id"]: float(p["score"]) for p in scored_products[:3]}
+            
+            from app.db import queries
+            queries.save_recommendation_history(
                 session_id=session_id,
                 user_id=user_id,
                 query=query,
                 recommended_products=top_products,
                 scores=scores_dict
             )
-            db.add(history_record)
-            db.commit()
-            logger.info(f"Saved recommendation history for session {session_id}.")
+            logger.info(f"Saved recommendation history to Supabase for user {user_id}.")
         except Exception as e:
             logger.error(f"Failed to save recommendation history: {str(e)}")
 

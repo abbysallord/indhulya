@@ -175,7 +175,14 @@ export default function AIChatbot() {
       const response = await fetch(`${backendUrl}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userText, session_id: sessionId })
+        body: JSON.stringify({ 
+          message: userText, 
+          session_id: sessionId,
+          history: messages.map(m => ({
+            role: m.sender === "user" ? "user" : "assistant",
+            content: m.text
+          }))
+        })
       });
 
       if (!response.ok) throw new Error("Failed to get response");

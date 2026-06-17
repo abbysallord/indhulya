@@ -9,7 +9,6 @@ os.environ["GROQ_API_KEY"] = "mock-key"
 from app.services.rag.rag_service import rag_service
 from app.services.chat_service import ChatService
 from app.schemas.chat import ChatRequest
-from app.services.guest_session_store import GUEST_SESSIONS, get_guest_session
 from app.services.prompt_builder import PromptBuilder
 
 class TestRAGAndGuestChat(unittest.TestCase):
@@ -40,7 +39,7 @@ class TestRAGAndGuestChat(unittest.TestCase):
     @patch('app.services.chat_service.llm_service')
     def test_guest_session_chat_flow(self, mock_llm):
         """
-        Verify the guest session creation, message storage, and reply generation flow.
+        Verify the stateless guest session generation and reply generation flow.
         """
         mock_llm.generate_chat_response.return_value = "This is a mock reply about the Aura ring."
         
@@ -52,21 +51,15 @@ class TestRAGAndGuestChat(unittest.TestCase):
         self.assertIsNotNone(guest_session_id)
         self.assertEqual(response.response, "This is a mock reply about the Aura ring.")
         
-        # Verify the session and message persistence in the guest store
-        session_data = get_guest_session(guest_session_id)
-        self.assertIsNotNone(session_data)
-        self.assertEqual(len(session_data["messages"]), 2) # 1 user, 1 assistant
-        self.assertEqual(session_data["messages"][0]["role"], "user")
-        self.assertEqual(session_data["messages"][0]["content"], "Tell me about the Aura ring")
-        self.assertEqual(session_data["messages"][1]["role"], "assistant")
-        self.assertEqual(session_data["messages"][1]["content"], "This is a mock reply about the Aura ring.")
-
-        # 2. Continue the guest conversation
-        request_followup = ChatRequest(message="What is its price?", session_id=guest_session_id)
+        # 2. Continue the guest conversation by passing history
+        history = [
+            {"role": "user", "content": "Tell me about the Aura ring"},
+            {"role": "assistant", "content": response.response}
+        ]
+        request_followup = ChatRequest(message="What is its price?", session_id=guest_session_id, history=history)
         response_followup = ChatService.process_chat(request_followup, user_id=None)
         
         self.assertEqual(response_followup.session_id, guest_session_id)
-        self.assertEqual(len(session_data["messages"]), 4) # 2 user, 2 assistant
 
     def test_prompt_builder_grounding_inclusion(self):
         """
@@ -119,7 +112,6 @@ class TestRAGAndGuestChat(unittest.TestCase):
         """
         import json
         
-        # Ensure log path is resolved
         log_path = rag_service.log_path
         
         # Record number of lines before query

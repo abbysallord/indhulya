@@ -2,6 +2,10 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 
+class MessageHistoryItem(BaseModel):
+    role: str = Field(..., description="Role of the message author: user or assistant")
+    content: str = Field(..., description="The content of the message.")
+
 class ChatRequest(BaseModel):
     session_id: Optional[str] = Field(
         None, 
@@ -11,6 +15,10 @@ class ChatRequest(BaseModel):
         ..., 
         description="The content of the user's query.",
         min_length=1
+    )
+    history: Optional[List[MessageHistoryItem]] = Field(
+        None,
+        description="Optional list of past conversation messages for stateless guest users."
     )
 
 class ChatResponse(BaseModel):

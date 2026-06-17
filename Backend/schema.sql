@@ -67,6 +67,12 @@ CREATE TABLE IF NOT EXISTS public.leads (
     name TEXT,
     email TEXT,
     phone TEXT,
+    interested_products JSONB DEFAULT '[]'::jsonb,
+    budget TEXT,
+    material_preference TEXT,
+    occasion TEXT,
+    conversation_summary TEXT,
+    lead_source TEXT,
     status TEXT NOT NULL DEFAULT 'captured',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
