@@ -87,3 +87,57 @@ CREATE TABLE IF NOT EXISTS public.recommendation_history (
     scores JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Create profiles table
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    full_name TEXT,
+    email TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS for profiles
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own profile" ON public.profiles
+    FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update their own profile" ON public.profiles
+    FOR UPDATE USING (auth.uid() = id);
+
+-- Enable RLS for user_preferences
+ALTER TABLE public.user_preferences ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can access their own preferences" ON public.user_preferences
+    FOR ALL USING (auth.uid()::text = user_id);
+
+-- Enable RLS for conversation_state
+ALTER TABLE public.conversation_state ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can access their own conversation state" ON public.conversation_state
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM public.chat_sessions
+            WHERE chat_sessions.id::text = conversation_state.session_id
+            AND chat_sessions.user_id = auth.uid()
+        )
+    );
+
+-- Enable RLS for leads
+ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
+
+-- Allow anonymous inserts so guest users can submit their lead details
+CREATE POLICY "Anyone can submit leads" ON public.leads
+    FOR INSERT WITH CHECK (true);
+
+-- Only allow users to view their own leads
+CREATE POLICY "Users can view their own leads" ON public.leads
+    FOR SELECT USING (auth.uid() = user_id);
+
+-- Enable RLS for recommendation_history
+ALTER TABLE public.recommendation_history ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can access their own recommendation history" ON public.recommendation_history
+    FOR ALL USING (auth.uid() = user_id);
+

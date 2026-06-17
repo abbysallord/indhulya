@@ -196,3 +196,25 @@ def save_recommendation_history(
     except Exception as e:
         logger.error(f"[DB-Query] Error saving recommendation history: {str(e)}")
     return None
+
+def create_user_profile(user_id: str, email: str, full_name: str) -> Optional[Dict[str, Any]]:
+    """
+    Creates a new public user profile in the database.
+    Table: profiles
+    """
+    logger.info(f"[DB-Query] Saving user profile for {user_id} ({email})")
+    if not supabase:
+        return None
+    try:
+        payload = {
+            "id": user_id,
+            "email": email,
+            "full_name": full_name
+        }
+        response = supabase.table("profiles").insert(payload).execute()
+        if response.data:
+            return response.data[0]
+    except Exception as e:
+        logger.error(f"[DB-Query] Error creating user profile: {str(e)}")
+    return None
+

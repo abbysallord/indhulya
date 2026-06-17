@@ -29,3 +29,33 @@ class LoginResponse(BaseModel):
         ...,
         description="The email address associated with the authenticated user."
     )
+
+class RegisterRequest(BaseModel):
+    full_name: str = Field(
+        ...,
+        description="The user's full name."
+    )
+    email: EmailStr = Field(
+        ...,
+        description="The user's registered email address."
+    )
+    password: str = Field(
+        ...,
+        description="The user's password.",
+        min_length=8
+    )
+
+class RegisterResponse(BaseModel):
+    user_id: str = Field(
+        ...,
+        description="The unique user ID created in the database."
+    )
+    user_email: str = Field(
+        ...,
+        description="The registered email address."
+    )
+    message: str = Field(
+        "User successfully registered",
+        description="A message confirming registration status."
+    )
+
