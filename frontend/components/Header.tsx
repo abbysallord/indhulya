@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { Search, MapPin, Heart, ShoppingBag, ChevronDown, Menu, X } from "lucide-react";
+import { Search, MapPin, Heart, ShoppingBag, ChevronDown, Menu, X, User } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -155,6 +155,10 @@ export default function Header() {
           </Link>
           <Link href="/store-locator" className="hidden sm:block text-gray-700 hover:text-black p-2" aria-label="Store Locator">
             <MapPin className="w-5 h-5" />
+          </Link>
+          <Link href="/auth" className="relative text-gray-700 hover:text-black p-2 flex items-center gap-1.5 group whitespace-nowrap" aria-label="Login">
+            <User className="w-5 h-5 shrink-0" />
+            <span className="hidden lg:block text-xs font-semibold uppercase tracking-wider group-hover:underline">Sign In</span>
           </Link>
           <Link href="/wishlist" className="relative text-gray-700 hover:text-black p-2" aria-label="Wishlist">
             <Heart className="w-5 h-5" />
