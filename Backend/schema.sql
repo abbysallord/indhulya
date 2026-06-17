@@ -1,7 +1,7 @@
 -- Create chat_sessions table
 CREATE TABLE IF NOT EXISTS public.chat_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
     title TEXT NOT NULL DEFAULT 'New Chat Session',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS public.conversation_state (
 -- Create leads table
 CREATE TABLE IF NOT EXISTS public.leads (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     session_id TEXT,
     name TEXT,
     email TEXT,
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS public.leads (
 CREATE TABLE IF NOT EXISTS public.recommendation_history (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     session_id TEXT NOT NULL,
-    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     query TEXT NOT NULL,
     recommended_products JSONB DEFAULT '[]'::jsonb,
     scores JSONB DEFAULT '{}'::jsonb,
