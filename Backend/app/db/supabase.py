@@ -5,8 +5,8 @@ from app.core.config import logger
 supabase: Client = None
 
 try:
-    # Setup Supabase client
-    supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
-    logger.info("Supabase client successfully initialized.")
+    # Setup Supabase client with service role key for administrative access
+    supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
+    logger.info("Supabase client successfully initialized with Service Role Key.")
 except Exception as e:
     logger.error(f"Error during Supabase client initialization: {str(e)}")
