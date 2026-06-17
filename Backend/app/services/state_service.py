@@ -211,9 +211,21 @@ class StateService:
 
         # Detect active state
         detected_state = analysis.get("state", "DISCOVERY")
+        current_msg_state = analysis.get("state", "DISCOVERY")
         
-        # State transitions and adjustments
-        purchase_intent = analysis.get("purchase_intent", False) or context.get("purchase_intent", False)
+        # Reset purchase intent lock if the user switches topics to greeting, FAQs, policies, 
+        # comparisons, or queries new products without active checkout intent or details.
+        is_providing_details = bool(new_lead.get("name") or new_lead.get("phone"))
+        has_active_purchase_intent = analysis.get("purchase_intent", False)
+        
+        if current_msg_state in ["GREETING", "FAQ", "POLICY", "COMPARISON"] or (
+            current_msg_state == "DISCOVERY" and not has_active_purchase_intent and not is_providing_details
+        ):
+            context["purchase_intent"] = False
+            purchase_intent = False
+            detected_state = current_msg_state
+        else:
+            purchase_intent = has_active_purchase_intent or context.get("purchase_intent", False)
         
         # Force LEAD_CAPTURE state if there is strong purchase intent and missing details for guests
         if purchase_intent and not user_id:

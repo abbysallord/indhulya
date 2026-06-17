@@ -314,5 +314,32 @@ class TestSalesAssistant(unittest.TestCase):
         self.assertEqual(guest_lead.name, "Vicky")
         self.assertEqual(guest_lead.phone, "9876543210")
 
+    @patch('app.services.chat_service.llm_service')
+    def test_sales_assistant_lead_breakout_flow(self, mock_llm):
+        """
+        Verify that a guest who is prompted for lead capture can break out of it by asking a new general query.
+        """
+        mock_llm.generate_chat_response.return_value = "Mocked LLM reply"
+        
+        # 1. Start session and trigger lead capture
+        req1 = ChatRequest(message="I want to buy a gold ring", session_id=None)
+        res1 = ChatService.process_chat(req1, user_id=None)
+        self.db.expire_all()
+        session_id = res1.session_id
+        
+        state_rec = self.db.query(ConversationState).filter(ConversationState.session_id == session_id).first()
+        self.assertEqual(state_rec.state, "LEAD_CAPTURE")
+        
+        # 2. Write unrelated message like "die here" (which is GENERAL/FAQ) and assert breakout
+        req2 = ChatRequest(message="die here", session_id=session_id)
+        res2 = ChatService.process_chat(req2, user_id=None)
+        self.db.expire_all()
+        
+        state_rec2 = self.db.query(ConversationState).filter(ConversationState.session_id == session_id).first()
+        # Assert state broke out of LEAD_CAPTURE into FAQ state
+        self.assertEqual(state_rec2.state, "FAQ")
+        # Assert purchase_intent is reset
+        self.assertFalse(state_rec2.context_data["purchase_intent"])
+
 if __name__ == '__main__':
     unittest.main()
