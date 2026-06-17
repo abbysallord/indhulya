@@ -37,3 +37,47 @@ CREATE POLICY "Users can access messages for their sessions" ON public.chat_mess
             AND chat_sessions.user_id = auth.uid()
         )
     );
+
+-- Create user_preferences table
+CREATE TABLE IF NOT EXISTS public.user_preferences (
+    user_id TEXT PRIMARY KEY,
+    preferred_materials JSONB DEFAULT '[]'::jsonb,
+    preferred_categories JSONB DEFAULT '[]'::jsonb,
+    budget_min DOUBLE PRECISION,
+    budget_max DOUBLE PRECISION,
+    occasions JSONB DEFAULT '[]'::jsonb,
+    style_preferences JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Create conversation_state table
+CREATE TABLE IF NOT EXISTS public.conversation_state (
+    session_id TEXT PRIMARY KEY,
+    state TEXT NOT NULL DEFAULT 'GREETING',
+    context_data JSONB DEFAULT '{}'::jsonb,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Create leads table
+CREATE TABLE IF NOT EXISTS public.leads (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    session_id TEXT,
+    name TEXT,
+    email TEXT,
+    phone TEXT,
+    status TEXT NOT NULL DEFAULT 'captured',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Create recommendation_history table
+CREATE TABLE IF NOT EXISTS public.recommendation_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id TEXT NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    query TEXT NOT NULL,
+    recommended_products JSONB DEFAULT '[]'::jsonb,
+    scores JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
