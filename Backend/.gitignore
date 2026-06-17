@@ -152,3 +152,7 @@ Thumbs.db
 *.njsproj
 *.sln
 *.swp
+
+# Application-specific databases and logs
+indhulya.db
+data/retrieval_analytics.jsonl
