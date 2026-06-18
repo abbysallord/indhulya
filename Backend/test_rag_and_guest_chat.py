@@ -36,7 +36,7 @@ class TestRAGAndGuestChat(unittest.TestCase):
         context_unrelated = rag_service.get_context("spaceships and laser swords")
         self.assertEqual(context_unrelated, "")
 
-    @patch('app.services.chat_service.llm_service')
+    @patch('app.services.conversation_orchestrator.llm_service')
     def test_guest_session_chat_flow(self, mock_llm):
         """
         Verify the stateless guest session generation and reply generation flow.

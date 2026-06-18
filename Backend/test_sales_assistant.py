@@ -246,7 +246,7 @@ class TestSalesAssistant(unittest.TestCase):
         self.assertIsNotNone(lead)
         mock_create.assert_called_once()
 
-    @patch('app.services.chat_service.llm_service')
+    @patch('app.services.conversation_orchestrator.llm_service')
     @patch('app.db.queries.create_lead')
     def test_sales_assistant_chat_orchestration_flow(self, mock_create, mock_llm):
         """
@@ -302,8 +302,8 @@ class TestSalesAssistant(unittest.TestCase):
         
         self.assertIn("registered", res5.response)
         mock_create.assert_called_once()
-
-    @patch('app.services.chat_service.llm_service')
+ 
+    @patch('app.services.conversation_orchestrator.llm_service')
     def test_sales_assistant_lead_breakout_flow(self, mock_llm):
         """
         Verify that a guest who is prompted for lead capture can break out of it by asking a new general query.
@@ -328,3 +328,4 @@ class TestSalesAssistant(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
