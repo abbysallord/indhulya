@@ -11,6 +11,7 @@ from app.services.rag.rag_service import rag_service
 from app.services.memory_service import MemoryService
 from app.services.prompt_builder import PromptBuilder
 from app.schemas.chat import ChatResponse
+from app.services.rag.classifier import QueryClassifier
 
 class ConversationOrchestrator:
     @classmethod
@@ -122,6 +123,31 @@ class ConversationOrchestrator:
         recommendation_decision = orchestration_result.get("recommendation_decision", False)
         lead_capture_decision = orchestration_result.get("lead_capture_decision", False)
 
+        # --- IMPLEMENT RETRIEVAL GATE ---
+        # Detect intent and classification to decide if retrieval is required
+        intent = internal_reasoning.get("intent", "OTHER").upper()
+        query_type = QueryClassifier.classify(user_message)
+        
+        retrieval_required = False
+        if intent in ["PRODUCT_SEARCH", "FAQ", "POLICY", "COMPARISON", "RECOMMENDATION"]:
+            retrieval_required = True
+        if query_type in ["PRODUCT", "FAQ", "POLICY", "COLLECTION", "MATERIAL"]:
+            retrieval_required = True
+            
+        # Hard exclusions for small talk and discovery conversations
+        if intent in ["GREETING", "BUDGET_UPDATE", "PREFERENCE_UPDATE"] or query_type == "GREETING":
+            retrieval_required = False
+            
+        # If the orchestrator wants to ask a discovery follow-up question, skip retrieval
+        next_action = internal_reasoning.get("next_action")
+        if next_action == "ASK_FOLLOWUP":
+            retrieval_required = False
+
+        # Overwrite final decision variables
+        retrieval_decision = retrieval_required
+        if not retrieval_decision:
+            recommendation_decision = False
+
         # --- Ask-vs-Answer and Recommendation Logic ---
         # Strictest rule: Do not recommend products until sufficient information is available.
         # Collect: category, budget, occasion, material preference before recommending.
@@ -143,8 +169,10 @@ class ConversationOrchestrator:
         # --- 3. Step 2: Retrieval Decision Layer ---
         rag_context = ""
         scored_products = []
+        retrieval_executed = False
         
         if retrieval_decision:
+            retrieval_executed = True
             if recommendation_decision:
                 # Retrieve matching products and run scoring
                 scored_products = RecommendationService.score_and_rank_products(updated_slots)
@@ -168,6 +196,7 @@ class ConversationOrchestrator:
             lead_info=lead_info,
             slots=updated_slots,
             is_guest=is_guest,
+            retrieval_mode=retrieval_decision,
             user_email=user_email,
             user_metadata=user_metadata
         )
@@ -228,6 +257,26 @@ class ConversationOrchestrator:
                         current_message=user_message,
                         assistant_reply=assistant_reply
                     )
+
+        # --- AUDIT DEBUG LOGGING ---
+        fallback_triggered = (assistant_reply.strip() == "I am sorry, but that information is not available in our current catalog.")
+        docs_retrieved = []
+        if scored_products:
+            docs_retrieved.extend([p["product"]["id"] for p in scored_products])
+        if rag_context:
+            doc_sources = re.findall(r"\[Document Source: ([^\]]+)\]", rag_context)
+            if doc_sources:
+                docs_retrieved.extend(doc_sources)
+                
+        logger.info(
+            f"[Conversation-Audit]\n"
+            f"- User Message: '{user_message}'\n"
+            f"- Detected Intent: '{intent}'\n"
+            f"- Retrieval Required: {retrieval_decision}\n"
+            f"- Retrieval Executed: {retrieval_executed}\n"
+            f"- Documents Retrieved: {docs_retrieved}\n"
+            f"- Fallback Triggered: {fallback_triggered}"
+        )
 
         return ChatResponse(
             response=assistant_reply,
@@ -346,20 +395,58 @@ class ConversationOrchestrator:
         if new_lead.get("phone"):
             lead_info["phone"] = new_lead["phone"]
 
-        state = analysis.get("state", "DISCOVERY")
-        p_intent = analysis.get("purchase_intent", False) or purchase_intent
-
-        sufficient, missing = StateService.check_sufficient_information(updated_slots)
+        # 1. Base classification from query_classifier
+        msg_last_clean = user_message.lower().strip()
+        query_type = QueryClassifier.classify(user_message)
         
-        if state in ["RECOMMENDATION", "DISCOVERY"]:
-            if sufficient:
-                state = "RECOMMENDATION"
+        # 2. Determine conversational mode override keywords
+        is_budget_update = "budget" in msg_last_clean or any(word.isdigit() for word in msg_last_clean.split() if len(word) >= 4)
+        is_preference_update = "like" in msg_last_clean or "prefer" in msg_last_clean or "wear" in msg_last_clean or "gift" in msg_last_clean or "looking for" in msg_last_clean
+        
+        state = "DISCOVERY"
+        if query_type == "GREETING":
+            state = "GREETING"
+        elif query_type == "POLICY":
+            state = "POLICY"
+        elif query_type in ["FAQ", "GENERAL", "MATERIAL", "COLLECTION"]:
+            state = "FAQ"
+        elif query_type == "PRODUCT":
+            # Check for specific qualifiers (material, collection) to run search.
+            # E.g. "Show me diamond rings" -> PRODUCT_SEARCH. "Show me some rings" -> DISCOVERY.
+            has_qualifiers = any(kw in msg_last_clean for kw in ["gold", "silver", "platinum", "diamond", "heritage", "aura", "nirvana"])
+            if has_qualifiers:
+                state = "PRODUCT_SEARCH"
             else:
                 state = "DISCOVERY"
+            
+        compare_keywords = ["compare", "vs", "difference", "better than", "contrast"]
+        if any(kw in msg_last_clean for kw in compare_keywords):
+            state = "COMPARISON"
+            
+        p_intent = analysis.get("purchase_intent", False) or purchase_intent
+        if p_intent:
+            state = "LEAD_CAPTURE"
+            
+        # Preference and budget updates overrides
+        if is_budget_update and state not in ["LEAD_CAPTURE", "POLICY"]:
+            state = "BUDGET_UPDATE"
+        elif is_preference_update and state not in ["LEAD_CAPTURE", "POLICY"]:
+            state = "PREFERENCE_UPDATE"
+
+        # Check for recommendations if slot collection is sufficient
+        sufficient, missing = StateService.check_sufficient_information(updated_slots)
+        if state in ["PRODUCT_SEARCH", "DISCOVERY"] and sufficient:
+            state = "RECOMMENDATION"
+        elif state == "RECOMMENDATION" and not sufficient:
+            state = "DISCOVERY"
 
         # Map state to next action
         next_action = "RESPOND_WITHOUT_RETRIEVAL"
         if state == "GREETING":
+            next_action = "RESPOND_WITHOUT_RETRIEVAL"
+        elif state == "BUDGET_UPDATE":
+            next_action = "RESPOND_WITHOUT_RETRIEVAL"
+        elif state == "PREFERENCE_UPDATE":
             next_action = "RESPOND_WITHOUT_RETRIEVAL"
         elif state == "DISCOVERY":
             next_action = "ASK_FOLLOWUP"
@@ -367,10 +454,10 @@ class ConversationOrchestrator:
             next_action = "RECOMMEND"
         elif state == "LEAD_CAPTURE":
             next_action = "LEAD_CAPTURE"
-        elif state in ["FAQ", "POLICY", "COMPARISON"]:
+        elif state in ["FAQ", "POLICY", "COMPARISON", "PRODUCT_SEARCH"]:
             next_action = "RETRIEVE_FAQ_OR_POLICY"
 
-        retrieval_decision = state in ["PRODUCT", "FAQ", "POLICY", "COMPARISON", "RECOMMENDATION"]
+        retrieval_decision = state in ["PRODUCT_SEARCH", "FAQ", "POLICY", "COMPARISON", "RECOMMENDATION"]
         recommendation_decision = (state == "RECOMMENDATION")
         lead_capture_decision = (state == "LEAD_CAPTURE")
 
@@ -400,6 +487,7 @@ class ConversationOrchestrator:
         lead_info: dict,
         slots: dict,
         is_guest: bool,
+        retrieval_mode: bool,
         user_email: Optional[str] = None,
         user_metadata: Optional[dict] = None
     ) -> str:
@@ -443,7 +531,12 @@ class ConversationOrchestrator:
             "5. DO NOT display the internal reasoning structure (JSON format, next_action, slots) to the user. Just generate the clean, conversational response text."
         )
 
-        messages = PromptBuilder.build_chat_prompt(user_message=user_message, history=history, rag_context=consolidated_context)
+        messages = PromptBuilder.build_chat_prompt(
+            user_message=user_message,
+            history=history,
+            rag_context=consolidated_context,
+            retrieval_mode=retrieval_mode
+        )
 
         try:
             reply = llm_service.generate_chat_response(messages)
