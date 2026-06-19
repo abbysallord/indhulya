@@ -51,8 +51,10 @@ export const metadata: Metadata = {
 import SmoothScroll from "@/components/SmoothScroll";
 import dynamic from "next/dynamic";
 import { StoreProvider } from "@/context/StoreContext";
+import { Analytics } from "@vercel/analytics/next";
 
 const AIChatbot = dynamic(() => import("@/components/AIChatbot"));
+const AdPopup = dynamic(() => import("@/components/AdPopup"));
 
 export default function RootLayout({
   children,
@@ -82,7 +84,9 @@ export default function RootLayout({
         <StoreProvider>
           <SmoothScroll>{children}</SmoothScroll>
           <AIChatbot />
+          <AdPopup />
         </StoreProvider>
+        <Analytics />
       </body>
     </html>
   );

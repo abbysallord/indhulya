@@ -22,6 +22,9 @@ type StoreContextType = {
   cartCount: number;
   wishlistCount: number;
   isMounted: boolean;
+  isLoggedIn: boolean;
+  login: () => void;
+  logout: () => void;
 };
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -32,6 +35,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [deliveryLocation, setDeliveryLocation] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -64,6 +68,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (savedLocation) {
           setDeliveryLocation(savedLocation);
         }
+        const savedAuth = localStorage.getItem("indhulya_auth");
+        if (savedAuth === "true") {
+          setIsLoggedIn(true);
+        }
       } catch (error) {
         console.error("Could not load from localStorage", error);
       }
@@ -80,8 +88,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       } else {
         localStorage.removeItem("indhulya_location");
       }
+      localStorage.setItem("indhulya_auth", isLoggedIn.toString());
     }
-  }, [cart, wishlist, deliveryLocation, isMounted]);
+  }, [cart, wishlist, deliveryLocation, isLoggedIn, isMounted]);
 
   const addToCart = (product: Product) => {
     setCart((prev) => [...prev, product]);
@@ -111,6 +120,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const login = () => {
+    setIsLoggedIn(true);
+    showToast("Successfully signed in");
+  };
+
+  const logout = () => {
+    setIsLoggedIn(false);
+    showToast("Successfully logged out");
+  };
+
   return (
     <StoreContext.Provider value={{
       cart,
@@ -122,7 +141,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setDeliveryLocation,
       cartCount: cart.length,
       wishlistCount: wishlist.length,
-      isMounted
+      isMounted,
+      isLoggedIn,
+      login,
+      logout
     }}>
       {children}
       <AnimatePresence>
