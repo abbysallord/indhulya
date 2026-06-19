@@ -147,6 +147,16 @@ class ConversationOrchestrator:
         retrieval_decision = retrieval_required
         if not retrieval_decision:
             recommendation_decision = False
+            # BUG FIX: If retrieval was blocked but next_action still says to retrieve/search,
+            # override it to ASK_FOLLOWUP so the response LLM asks a question instead of
+            # hallucinating product information without any catalog data.
+            if next_action in ["RETRIEVE_FAQ_OR_POLICY", "RECOMMEND"] or intent in ["PRODUCT_SEARCH", "COMPARISON"]:
+                internal_reasoning["next_action"] = "ASK_FOLLOWUP"
+                next_action = "ASK_FOLLOWUP"
+                logger.info(f"Retrieval Gate: Overriding next_action to ASK_FOLLOWUP (was: {intent}, retrieval blocked).")
+            elif intent in ["GREETING", "BUDGET_UPDATE", "PREFERENCE_UPDATE"] or query_type == "GREETING":
+                internal_reasoning["next_action"] = "RESPOND_WITHOUT_RETRIEVAL"
+                next_action = "RESPOND_WITHOUT_RETRIEVAL"
 
         # --- Ask-vs-Answer and Recommendation Logic ---
         # Strictest rule: Do not recommend products until sufficient information is available.
@@ -159,12 +169,14 @@ class ConversationOrchestrator:
             recommendation_decision = False
             retrieval_decision = False
             internal_reasoning["next_action"] = "ASK_FOLLOWUP"
+            next_action = "ASK_FOLLOWUP"
             internal_reasoning["missing_information"] = ", ".join(missing)
         
         # If purchase intent is high for guests, override to LEAD_CAPTURE
         if purchase_intent and is_guest:
             lead_capture_decision = True
             internal_reasoning["next_action"] = "LEAD_CAPTURE"
+            next_action = "LEAD_CAPTURE"
 
         # --- 3. Step 2: Retrieval Decision Layer ---
         rag_context = ""
@@ -187,9 +199,12 @@ class ConversationOrchestrator:
                 logger.error(f"RAG retrieval failed: {str(e)}")
 
         # --- 4. Step 3: Response Generation ---
+        # Cap history to last 8 turns to prevent huge payloads (87-message bug)
+        capped_history = history[-8:] if len(history) > 8 else history
+        
         assistant_reply = cls._generate_consultant_response(
             user_message=user_message,
-            history=history,
+            history=capped_history,
             internal_reasoning=internal_reasoning,
             rag_context=rag_context,
             scored_products=scored_products,
@@ -268,13 +283,18 @@ class ConversationOrchestrator:
             if doc_sources:
                 docs_retrieved.extend(doc_sources)
                 
+        final_action = internal_reasoning.get("next_action", "UNKNOWN")
         logger.info(
             f"[Conversation-Audit]\n"
             f"- User Message: '{user_message}'\n"
             f"- Detected Intent: '{intent}'\n"
+            f"- Query Type: '{query_type}'\n"
+            f"- Final Next Action: '{final_action}'\n"
             f"- Retrieval Required: {retrieval_decision}\n"
             f"- Retrieval Executed: {retrieval_executed}\n"
             f"- Documents Retrieved: {docs_retrieved}\n"
+            f"- Sufficient Slots: {sufficient}\n"
+            f"- Missing Slots: {missing}\n"
             f"- Fallback Triggered: {fallback_triggered}"
         )
 
@@ -507,28 +527,70 @@ class ConversationOrchestrator:
                 )
             recommended_products_str = "\n".join(prod_lines)
 
-        # Build prompt using PromptBuilder
+        next_action = internal_reasoning.get("next_action", "RESPOND_WITHOUT_RETRIEVAL")
+        missing_slots = internal_reasoning.get("missing_information", "")
+        known_slots = internal_reasoning.get("known_information", "")
+        
+        # Build a VERY clear, directive prompt based on the current action
+        if next_action == "ASK_FOLLOWUP":
+            action_instruction = (
+                "YOUR TASK THIS TURN: Ask ONE focused follow-up question to collect a missing detail.\n"
+                f"Missing details still needed: {missing_slots or 'occasion, material, or budget'}.\n"
+                f"Details you already know: {known_slots or 'none yet'}.\n"
+                "Ask only about ONE missing detail — the most important one. Be warm and concise.\n"
+                "DO NOT list any products. DO NOT mention catalog items. Just ask your question naturally."
+            )
+        elif next_action == "RESPOND_WITHOUT_RETRIEVAL":
+            action_instruction = (
+                "YOUR TASK THIS TURN: Respond conversationally and warmly.\n"
+                "Greet the user, acknowledge what they said, and gently invite them to share what they're looking for.\n"
+                "DO NOT list products. DO NOT mention any catalog items."
+            )
+        elif next_action == "RECOMMEND":
+            action_instruction = (
+                "YOUR TASK THIS TURN: Present personalized jewelry recommendations.\n"
+                f"You know: {known_slots}.\n"
+                "Present at most 3 products with pricing and explain why each matches their needs. Be warm and concise."
+            )
+        elif next_action == "LEAD_CAPTURE":
+            name = lead_info.get("name")
+            phone = lead_info.get("phone")
+            if not name and not phone:
+                action_instruction = (
+                    "YOUR TASK THIS TURN: The customer is ready to buy. Ask for their name and phone number so our team can follow up."
+                )
+            elif not phone:
+                action_instruction = f"YOUR TASK THIS TURN: You already know the customer's name is {name}. Ask for their phone number now."
+            elif not name:
+                action_instruction = "YOUR TASK THIS TURN: Ask for the customer's name so you can personalize the follow-up."
+            else:
+                action_instruction = f"YOUR TASK THIS TURN: Confirm to {name} that their details have been registered and the team will reach out shortly."
+        elif next_action == "RETRIEVE_FAQ_OR_POLICY":
+            action_instruction = (
+                "YOUR TASK THIS TURN: Answer the customer's question using ONLY the Retrieved Catalog/Policy Context below.\n"
+                "If the answer is not in the context, say: 'I am sorry, but that information is not available in our current catalog.'\n"
+                "Do not guess or use general knowledge."
+            )
+        else:
+            action_instruction = (
+                "YOUR TASK THIS TURN: Respond warmly and helpfully as a premium jewelry consultant."
+            )
+
         consolidated_context = (
-            "You are an experienced, premium jewelry consultant at Indhulya.\n"
-            "Guide the user naturally, concisely, and warmly. Speak naturally like a human, avoid robotic/catalog-style replies, and avoid dumping large lists.\n\n"
-            "Orchestrator Internal Reasoning:\n"
-            f"- Intent: {internal_reasoning.get('intent')}\n"
-            f"- Known Information: {internal_reasoning.get('known_information')}\n"
-            f"- Missing Information: {internal_reasoning.get('missing_information')}\n"
-            f"- Next Action: {internal_reasoning.get('next_action')}\n\n"
+            f"{action_instruction}\n\n"
+            "---\n"
+            "You are a warm, experienced premium jewelry consultant at Indhulya.\n"
+            "Speak naturally like a human — concise, friendly, and professional. Never dump large product lists unprompted.\n"
         )
+
         if rag_context:
-            consolidated_context += f"Retrieved Catalog/Policy Context:\n{rag_context}\n\n"
+            consolidated_context += f"\nRetrieved Catalog/Policy Context:\n{rag_context}\n"
         if recommended_products_str:
-            consolidated_context += f"Recommended Products:\n{recommended_products_str}\n\n"
-            
+            consolidated_context += f"\nRecommended Products:\n{recommended_products_str}\n"
+
         consolidated_context += (
-            "Rules:\n"
-            "1. Speak like a professional consultant.\n"
-            "2. If next_action is ASK_FOLLOWUP, ask a friendly, concise question to collect one of the missing slots. Do not output lists of products.\n"
-            "3. If next_action is RECOMMEND, present at most 3 products with pricing, details, and explain why they match their slots.\n"
-            "4. If next_action is LEAD_CAPTURE, ask for name/phone if missing (mention 'share your name and phone number' to finalize), or let them know their details have been registered if both name and phone are known.\n"
-            "5. DO NOT display the internal reasoning structure (JSON format, next_action, slots) to the user. Just generate the clean, conversational response text."
+            "\nIMPORTANT: Do NOT reveal the internal reasoning, next_action, or slot data to the user. "
+            "Generate only the clean, natural response text."
         )
 
         messages = PromptBuilder.build_chat_prompt(
