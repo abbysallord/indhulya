@@ -1,6 +1,14 @@
 from typing import List, Dict, Any, Optional
 from app.db.supabase import supabase
 from app.core.config import logger
+import uuid
+
+def _is_valid_uuid(val: Any) -> bool:
+    try:
+        uuid.UUID(str(val))
+        return True
+    except ValueError:
+        return False
 
 def create_chat_session(user_id: str, title: str = "New Chat Session") -> Dict[str, Any]:
     """
@@ -24,6 +32,9 @@ def save_chat_message(session_id: str, role: str, content: str) -> Dict[str, Any
     Table: chat_messages
     """
     logger.info(f"[DB-Query] Saving message for session {session_id} with role '{role}'")
+    if not _is_valid_uuid(session_id):
+        logger.error(f"[DB-Query] Invalid UUID session_id passed to save_chat_message: {session_id}")
+        return {"id": "mock-message-id", "session_id": session_id, "role": role, "content": content}
     data = {
         "session_id": session_id,
         "role": role,
@@ -50,6 +61,9 @@ def get_chat_session_by_id(session_id: str, user_id: str) -> Optional[Dict[str, 
     Retrieves a single chat session. Checks ownership via user_id.
     """
     logger.info(f"[DB-Query] Retrieving session {session_id}")
+    if not _is_valid_uuid(session_id):
+        logger.warning(f"[DB-Query] Invalid UUID session_id passed to get_chat_session_by_id: {session_id}")
+        return None
     if not supabase:
         return None
     response = supabase.table("chat_sessions").select("*").eq("id", session_id).eq("user_id", user_id).execute()
@@ -63,6 +77,9 @@ def get_chat_session_messages(session_id: str) -> List[Dict[str, Any]]:
     Table: chat_messages
     """
     logger.info(f"[DB-Query] Retrieving messages for session {session_id}")
+    if not _is_valid_uuid(session_id):
+        logger.warning(f"[DB-Query] Invalid UUID session_id passed to get_chat_session_messages: {session_id}")
+        return []
     if not supabase:
         return []
     response = supabase.table("chat_messages").select("*").eq("session_id", session_id).order("created_at").execute()
@@ -73,6 +90,9 @@ def delete_chat_session(session_id: str, user_id: str) -> bool:
     Deletes a chat session if it belongs to the user.
     """
     logger.info(f"[DB-Query] Deleting session {session_id}")
+    if not _is_valid_uuid(session_id):
+        logger.warning(f"[DB-Query] Invalid UUID session_id passed to delete_chat_session: {session_id}")
+        return False
     if not supabase:
         return False
     response = supabase.table("chat_sessions").delete().eq("id", session_id).eq("user_id", user_id).execute()
@@ -125,6 +145,9 @@ def get_conversation_state(session_id: str) -> Optional[Dict[str, Any]]:
     Retrieves the conversation state from Supabase.
     """
     logger.info(f"[DB-Query] Retrieving conversation state for session {session_id}")
+    if not _is_valid_uuid(session_id):
+        logger.warning(f"[DB-Query] Invalid UUID session_id passed to get_conversation_state: {session_id}")
+        return None
     if not supabase:
         return None
     try:
@@ -140,6 +163,9 @@ def save_conversation_state(session_id: str, state: str, context_data: Dict[str,
     Saves or updates the conversation state in Supabase.
     """
     logger.info(f"[DB-Query] Saving conversation state for session {session_id} as state: {state}")
+    if not _is_valid_uuid(session_id):
+        logger.warning(f"[DB-Query] Invalid UUID session_id passed to save_conversation_state: {session_id}")
+        return False
     if not supabase:
         return False
     try:

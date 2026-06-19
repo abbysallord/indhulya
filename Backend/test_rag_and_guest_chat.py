@@ -17,23 +17,23 @@ class TestRAGAndGuestChat(unittest.TestCase):
         Verify that TF-IDF search retrieves the correct documents for specific keyword queries.
         """
         # Test product matching
-        context_gold = rag_service.get_context("gold ring")
+        context_gold, _ = rag_service.get_context("gold ring")
         self.assertIn("Aura Minimalist Ring", context_gold)
         self.assertIn("18K Yellow Gold", context_gold) # linked material name check
         
         # Test collection matching
-        context_heritage = rag_service.get_context("Heritage collection")
+        context_heritage, _ = rag_service.get_context("Heritage collection")
         self.assertIn("Heritage Collection", context_heritage)
         
         # Test FAQ matching
-        context_return = rag_service.get_context("return policy")
+        context_return, _ = rag_service.get_context("return policy")
         self.assertIn("30-day return policy", context_return)
 
     def test_retriever_no_match(self):
         """
         Verify that search queries for out-of-catalog items return empty context.
         """
-        context_unrelated = rag_service.get_context("spaceships and laser swords")
+        context_unrelated, _ = rag_service.get_context("spaceships and laser swords")
         self.assertEqual(context_unrelated, "")
 
     @patch('app.services.conversation_orchestrator.llm_service')

@@ -501,7 +501,7 @@ export default function AIChatbot() {
         headers,
         body: JSON.stringify({
           message: userText,
-          session_id: activeSession.backendSessionId,
+          session_id: (authToken && activeSession.backendSessionId?.startsWith("guest_")) ? null : activeSession.backendSessionId,
           history: activeSession.messages.map((m) => ({
             role: m.sender === "user" ? "user" : "assistant",
             content: m.text,
