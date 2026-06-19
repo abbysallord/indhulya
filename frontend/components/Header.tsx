@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/context/StoreContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Header() {
   const [isPincodeOpen, setIsPincodeOpen] = useState(false);
