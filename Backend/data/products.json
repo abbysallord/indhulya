@@ -7,6 +7,7 @@
     "collection_id": "aura",
     "price": 499.0,
     "availability": "In Stock",
+    "image_url": "https://images.indhulya.com/products/aura-minimalist-band.jpg",
     "description": "Sleek and geometric, the Aura Minimalist Ring is designed for modern elegance. A perfect band for stackability or wearing solo.",
     "specifications": {
       "weight": "3.2g",
@@ -23,6 +24,7 @@
     "collection_id": "heritage",
     "price": 189.0,
     "availability": "In Stock",
+    "image_url": "https://images.indhulya.com/products/heritage-filigree-earrings.jpg",
     "description": "Intricately detailed silver earrings hand-carved with traditional filigree patterns. Reflects the depth of heritage craftsmanship.",
     "specifications": {
       "weight": "8.5g",
@@ -39,6 +41,7 @@
     "collection_id": "nirvana",
     "price": 1299.0,
     "availability": "Made to Order",
+    "image_url": "https://images.indhulya.com/products/nirvana-lotus-necklace.jpg",
     "description": "A premium platinum chain holding a beautifully detailed lotus pendant. Symbolizes purity and spiritual awakening.",
     "specifications": {
       "weight": "12g",
@@ -55,6 +58,7 @@
     "collection_id": "aura",
     "price": 750.0,
     "availability": "In Stock",
+    "image_url": "https://images.indhulya.com/products/aura-diamond-studs.jpg",
     "description": "Simple yellow gold studs set with high-grade conflict-free diamonds. Brings a touch of daily brilliance.",
     "specifications": {
       "weight": "2.1g",

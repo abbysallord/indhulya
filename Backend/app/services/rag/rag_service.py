@@ -28,10 +28,12 @@ class RAGService:
         # Resolve analytics log path under backend root
         self.log_path = Path(__file__).resolve().parent.parent.parent.parent / "data" / "retrieval_analytics.jsonl"
 
-    def get_context(self, query: str) -> str:
+    def get_context(self, query: str) -> tuple:
         """
         Processes query classification, retrieves matched context, optimizes it,
-        logs latencies/metadata, and returns the grounded prompt content block.
+        logs latencies/metadata, and returns a tuple of:
+          - context_string: grounded prompt content block (str)
+          - image_urls: list of product image URLs from retrieved documents (list[str])
         """
         start_time = time.time()
         query_type = "GENERAL"
@@ -55,7 +57,7 @@ class RAGService:
                 scores=[],
                 latency_ms=latency_ms
             )
-            return ""
+            return "", []
 
         # Step 2: Retrieve candidate documents matching the classification type
         docs = []
@@ -93,6 +95,18 @@ class RAGService:
         context_string = "\n\n---\n\n".join(context_parts)
         latency_ms = round((time.time() - start_time) * 1000, 2)
 
+        # Collect image URLs from retrieved product documents
+        image_urls = []
+        seen_image_ids = set()
+        for doc in docs:
+            doc_id = doc.get("id")
+            if doc_id in seen_image_ids:
+                continue
+            seen_image_ids.add(doc_id)
+            img = doc.get("metadata", {}).get("image_url")
+            if img:
+                image_urls.append(img)
+
         # Step 4: Write Log Analytics
         expanded_query = query
         if settings.RAG_ENABLE_SYNONYM_EXPANSION:
@@ -113,7 +127,7 @@ class RAGService:
             latency_ms=latency_ms
         )
 
-        return context_string
+        return context_string, image_urls
 
     def _write_analytics(self, query: str, expanded_query: str, query_type: str, doc_ids: list, scores: list, latency_ms: float):
         """

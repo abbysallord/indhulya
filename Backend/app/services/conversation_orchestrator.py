@@ -182,6 +182,7 @@ class ConversationOrchestrator:
         rag_context = ""
         scored_products = []
         retrieval_executed = False
+        rag_image_urls: list = []
         
         if retrieval_decision:
             retrieval_executed = True
@@ -194,7 +195,7 @@ class ConversationOrchestrator:
             
             # Fetch catalog policies/FAQ
             try:
-                rag_context = rag_service.get_context(user_message)
+                rag_context, rag_image_urls = rag_service.get_context(user_message)
             except Exception as e:
                 logger.error(f"RAG retrieval failed: {str(e)}")
 
@@ -298,9 +299,25 @@ class ConversationOrchestrator:
             f"- Fallback Triggered: {fallback_triggered}"
         )
 
+        # Collect image URLs from recommendations + RAG retrieval (deduplicated)
+        response_images: list = []
+        seen_img_urls: set = set()
+        # Images from top recommended products
+        for item in scored_products[:3]:
+            img = item.get("product", {}).get("image_url")
+            if img and img not in seen_img_urls:
+                response_images.append(img)
+                seen_img_urls.add(img)
+        # Images from RAG-retrieved docs
+        for img in rag_image_urls:
+            if img and img not in seen_img_urls:
+                response_images.append(img)
+                seen_img_urls.add(img)
+
         return ChatResponse(
             response=assistant_reply,
-            session_id=session_id
+            session_id=session_id,
+            images=response_images
         )
 
     @classmethod

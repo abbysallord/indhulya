@@ -99,6 +99,7 @@ class DataIngestionService:
                 "availability": availability,
                 "material_id": mat_id,
                 "collection_id": coll_id,
+                "image_url": prod.get("image_url"),
                 "source": "products.json"
             }
             documents.append(Document(doc_id=f"prod_{prod_id}", content=content, metadata=metadata))

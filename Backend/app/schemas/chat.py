@@ -30,6 +30,10 @@ class ChatResponse(BaseModel):
         ..., 
         description="The session identifier associated with this response."
     )
+    images: List[str] = Field(
+        default_factory=list,
+        description="Optional list of product image URLs relevant to this response."
+    )
 
 class SessionCreate(BaseModel):
     title: Optional[str] = Field(None, description="Title of the session")
