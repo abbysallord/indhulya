@@ -2,9 +2,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   MessageCircle, X, Send, Sparkles, Maximize2, Minimize2,
-  History, ChevronLeft, Plus, Pencil, Check, Clock,
+  History, ChevronLeft, Plus, Pencil, Check, Clock, Cloud, Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useStore } from "../context/StoreContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -12,6 +13,7 @@ type Message = {
   id: number;
   text: string;
   sender: "bot" | "user";
+  images?: string[];
 };
 
 type ChatSession = {
@@ -21,6 +23,23 @@ type ChatSession = {
   createdAt: number;
   updatedAt: number;
   backendSessionId: string | null;
+};
+
+type RemoteSession = {
+  id: string;
+  title: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
+type DisplaySession = {
+  id: string;
+  name: string;
+  updatedAt: number;
+  type: "remote" | "local";
+  messageCount?: number;
+  rawLocal?: ChatSession;
+  rawRemote?: RemoteSession;
 };
 
 type View = "current" | "sessions";
@@ -229,31 +248,31 @@ export default function AIChatbot() {
   const inputRef       = useRef<HTMLInputElement>(null);
   const renameRef      = useRef<HTMLInputElement>(null);
 
-  // ── Mount: migrate, load sessions, resume last active ────────────────────────
-  useEffect(() => {
-    let loaded = loadSessions();
-    loaded = migrateOldKeys(loaded);
-    saveSessions(loaded);
-    setSessions(loaded);
+  // Supabase auth and remote sessions state
+  const { isLoggedIn, isMounted, logout } = useStore();
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [remoteSessions, setRemoteSessions] = useState<RemoteSession[]>([]);
+  const [isLoadingRemote, setIsLoadingRemote] = useState(false);
+  const [isLoadingSessionDetail, setIsLoadingSessionDetail] = useState(false);
+  const [remoteError, setRemoteError] = useState<string | null>(null);
 
-    const activeId = localStorage.getItem(KEY_ACTIVE_SESSION);
-    if (activeId) {
-      const existing = loaded.find((s) => s.id === activeId);
-      if (existing) {
-        setActiveSession(existing);
-        return;
-      }
-    }
-    // No active session: start fresh (default state is already set)
+  // ── Actions / Callbacks ───────────────────────────────────────────────────────
+
+  /** Start a completely fresh session */
+  const startNewChat = useCallback(() => {
+    const fresh: ChatSession = {
+      id: genId(),
+      name: "",
+      messages: [WELCOME_MESSAGE],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      backendSessionId: null,
+    };
+    setActiveSession(fresh);
+    localStorage.removeItem(KEY_ACTIVE_SESSION);
+    setView("current");
+    setInputValue("");
   }, []);
-
-  // ── Persist active session id ─────────────────────────────────────────────────
-  useEffect(() => {
-    if (activeSession.name) {
-      // Only persist if this session has actual content
-      localStorage.setItem(KEY_ACTIVE_SESSION, activeSession.id);
-    }
-  }, [activeSession.id, activeSession.name]);
 
   // ── Upsert session into the list whenever messages change ─────────────────────
   const persistSession = useCallback((sess: ChatSession) => {
@@ -264,14 +283,156 @@ export default function AIChatbot() {
     });
   }, []);
 
+  /** Commit rename */
+  const commitRename = useCallback(() => {
+    const newName = renameValue.trim();
+    if (newName) {
+      const updated = { ...activeSession, name: newName };
+      setActiveSession(updated);
+      persistSession(updated);
+    }
+    setIsRenaming(false);
+  }, [activeSession, renameValue, persistSession]);
+
+  /** Auth error helper */
+  const handleAuthError = useCallback(() => {
+    localStorage.removeItem("indhulya_auth_token");
+    localStorage.removeItem("indhulya_auth_email");
+    localStorage.removeItem("indhulya_auth_user_id");
+    logout();
+    setAuthToken(null);
+    setRemoteSessions([]);
+    setView("sessions");
+    alert("Your session has expired. Please sign in again.");
+  }, [logout]);
+
+  /** Fetch all remote sessions from Supabase */
+  const fetchRemoteSessions = useCallback(async (token: string) => {
+    setIsLoadingRemote(true);
+    setRemoteError(null);
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    try {
+      const res = await fetch(`${backendUrl}/chat/sessions`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.status === 401) {
+        handleAuthError();
+        return;
+      }
+      if (!res.ok) {
+        throw new Error("Failed to fetch chat sessions");
+      }
+      const data = await res.json();
+      const mapped: RemoteSession[] = (data || []).map((s: any) => ({
+        id: s.id,
+        title: s.title,
+        createdAt: Date.parse(s.created_at) || Date.now(),
+        updatedAt: Date.parse(s.updated_at) || Date.now()
+      }));
+      setRemoteSessions(mapped);
+    } catch (err: any) {
+      console.error(err);
+      setRemoteError(err.message || "Failed to load chats");
+    } finally {
+      setIsLoadingRemote(false);
+    }
+  }, [handleAuthError]);
+
+  /** Resume a remote session from Supabase */
+  const resumeRemoteSession = useCallback(async (sess: RemoteSession, token: string) => {
+    setView("current");
+    setIsLoadingSessionDetail(true);
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    try {
+      const res = await fetch(`${backendUrl}/chat/sessions/${sess.id}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.status === 401) {
+        handleAuthError();
+        return;
+      }
+      if (!res.ok) {
+        throw new Error("Failed to fetch session messages");
+      }
+      const data = await res.json();
+      const mappedMessages: Message[] = (data.messages || []).map((m: any) => ({
+        id: Math.random(),
+        text: m.content,
+        sender: m.role === "user" ? "user" : "bot"
+      }));
+      const messagesToSet = mappedMessages.length > 0 ? mappedMessages : [WELCOME_MESSAGE];
+      const resumed: ChatSession = {
+        id: sess.id,
+        name: sess.title,
+        messages: messagesToSet,
+        createdAt: sess.createdAt,
+        updatedAt: sess.updatedAt,
+        backendSessionId: sess.id
+      };
+      setActiveSession(resumed);
+    } catch (err) {
+      console.error(err);
+      alert("Could not load session. Please try again.");
+      setView("sessions");
+    } finally {
+      setIsLoadingSessionDetail(false);
+    }
+  }, [handleAuthError]);
+
+  // ── Mount/Auth Sync: load sessions, handle login status change ────────────────────────
+  useEffect(() => {
+    if (!isMounted) return;
+
+    if (isLoggedIn) {
+      const token = localStorage.getItem("indhulya_auth_token");
+      setAuthToken(token);
+      if (token) {
+        fetchRemoteSessions(token);
+      }
+      // For logged-in users, always start fresh on mount/open
+      startNewChat();
+    } else {
+      setAuthToken(null);
+      setRemoteSessions([]);
+      
+      let loaded = loadSessions();
+      loaded = migrateOldKeys(loaded);
+      saveSessions(loaded);
+      setSessions(loaded);
+
+      const activeId = localStorage.getItem(KEY_ACTIVE_SESSION);
+      if (activeId) {
+        const existing = loaded.find((s) => s.id === activeId);
+        if (existing) {
+          setActiveSession(existing);
+          return;
+        }
+      }
+      // Fallback to start fresh
+      startNewChat();
+    }
+  }, [isLoggedIn, isMounted, fetchRemoteSessions, startNewChat]);
+
+  // ── Persist active session id ─────────────────────────────────────────────────
+  useEffect(() => {
+    if (activeSession.name && !authToken) {
+      // Only persist if this session has actual content and user is guest
+      localStorage.setItem(KEY_ACTIVE_SESSION, activeSession.id);
+    }
+  }, [activeSession.id, activeSession.name, authToken]);
+
   // ── Save on page unload ───────────────────────────────────────────────────────
   useEffect(() => {
     const handle = () => {
-      if (activeSession.messages.length > 1) persistSession(activeSession);
+      if (activeSession.messages.length > 1 && !authToken) persistSession(activeSession);
     };
     window.addEventListener("beforeunload", handle);
     return () => window.removeEventListener("beforeunload", handle);
-  }, [activeSession, persistSession]);
+  }, [activeSession, persistSession, authToken]);
 
   // ── Auto-scroll ───────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -299,38 +460,11 @@ export default function AIChatbot() {
 
   // ─── Actions ──────────────────────────────────────────────────────────────────
 
-  /** Start a completely fresh session */
-  const startNewChat = () => {
-    const fresh: ChatSession = {
-      id: genId(),
-      name: "",
-      messages: [WELCOME_MESSAGE],
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      backendSessionId: null,
-    };
-    setActiveSession(fresh);
-    localStorage.removeItem(KEY_ACTIVE_SESSION);
-    setView("current");
-    setInputValue("");
-  };
-
-  /** Resume a past session */
+  /** Resume a past guest session */
   const resumeSession = (sess: ChatSession) => {
     setActiveSession(sess);
     localStorage.setItem(KEY_ACTIVE_SESSION, sess.id);
     setView("current");
-  };
-
-  /** Commit rename */
-  const commitRename = () => {
-    const newName = renameValue.trim();
-    if (newName) {
-      const updated = { ...activeSession, name: newName };
-      setActiveSession(updated);
-      persistSession(updated);
-    }
-    setIsRenaming(false);
   };
 
   /** Submit a user message */
@@ -357,9 +491,14 @@ export default function AIChatbot() {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (authToken) {
+        headers["Authorization"] = `Bearer ${authToken}`;
+      }
+
       const res = await fetch(`${backendUrl}/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           message: userText,
           session_id: activeSession.backendSessionId,
@@ -370,10 +509,20 @@ export default function AIChatbot() {
         }),
       });
 
+      if (res.status === 401) {
+        handleAuthError();
+        return;
+      }
+
       if (!res.ok) throw new Error("Server error");
       const data = await res.json();
 
-      const botMsg: Message = { id: Math.random(), text: data.response, sender: "bot" };
+      const botMsg: Message = {
+        id: Math.random(),
+        text: data.response,
+        sender: "bot",
+        images: data.images
+      };
       const finalSession: ChatSession = {
         ...updatedWithUser,
         messages: [...newMessages, botMsg],
@@ -381,7 +530,13 @@ export default function AIChatbot() {
         backendSessionId: data.session_id ?? updatedWithUser.backendSessionId,
       };
       setActiveSession(finalSession);
-      persistSession(finalSession);
+      
+      if (!authToken) {
+        persistSession(finalSession);
+      } else {
+        // Refresh remote list so history is up to date
+        fetchRemoteSessions(authToken);
+      }
     } catch {
       const errMsg: Message = {
         id: Math.random(),
@@ -394,7 +549,9 @@ export default function AIChatbot() {
         updatedAt: Date.now(),
       };
       setActiveSession(errSession);
-      persistSession(errSession);
+      if (!authToken) {
+        persistSession(errSession);
+      }
     } finally {
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 10);
@@ -430,23 +587,23 @@ export default function AIChatbot() {
           : "bg-white/90 border border-white/50 text-gray-800 rounded-tl-none shadow-sm"
       }`}>
         {formatMessage(msg.text)}
+        {msg.images && msg.images.length > 0 && (
+          <div className="grid grid-cols-2 gap-2 mt-3">
+            {msg.images.map((url, idx) => (
+              <img
+                key={idx}
+                src={url}
+                alt="Product Recommendation"
+                className="w-full h-24 md:h-32 object-cover rounded-lg shadow-sm border border-gray-100"
+              />
+            ))}
+          </div>
+        )}
       </div>
     </motion.div>
   );
 
-  /** Groups sessions by Today / Yesterday / This Week / Older */
-  const groupedSessions = () => {
-    const groups: Record<string, ChatSession[]> = {};
-    for (const sess of sessions) {
-      if (sess.messages.length <= 1) continue; // skip empty sessions
-      const group = relativeGroup(sess.updatedAt);
-      if (!groups[group]) groups[group] = [];
-      groups[group].push(sess);
-    }
-    return groups;
-  };
-
-  const GROUP_ORDER = ["Today", "Yesterday", "This Week", "Older"];
+  // Note: groupedSessions and getGroupOrder are now defined dynamically inside the component
 
   // ─── Render header ────────────────────────────────────────────────────────────
   const renderHeader = (expanded: boolean) => (
@@ -478,19 +635,29 @@ export default function AIChatbot() {
             </div>
           ) : (
             <button
-              onClick={() => { setRenameValue(activeSession.name || ""); setIsRenaming(true); }}
-              className="flex items-center gap-1 group"
-              title="Click to rename"
+              onClick={() => {
+                if (!activeSession.backendSessionId) {
+                  setRenameValue(activeSession.name || "");
+                  setIsRenaming(true);
+                }
+              }}
+              disabled={!!activeSession.backendSessionId}
+              className={`flex items-center gap-1 ${!activeSession.backendSessionId ? "group cursor-pointer" : "cursor-default"}`}
+              title={!activeSession.backendSessionId ? "Click to rename" : undefined}
             >
               <h3 className="font-semibold text-sm truncate max-w-[140px]">
                 {activeSession.name || "Indhulya AI"}
               </h3>
-              <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0" />
+              {!activeSession.backendSessionId && (
+                <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0" />
+              )}
             </button>
           )}
           <p className="text-[10px] text-[#E5B94E] flex items-center gap-1 mt-0.5">
             {view === "sessions" ? (
-              <span className="opacity-75">{sessions.filter(s => s.messages.length > 1).length} sessions</span>
+              <span className="opacity-75">
+                {(authToken ? remoteSessions.length : 0) + sessions.filter(s => s.messages.length > 1).length} sessions
+              </span>
             ) : (
               <><span className="w-1.5 h-1.5 rounded-full bg-green-400" />Online</>
             )}
@@ -504,7 +671,7 @@ export default function AIChatbot() {
             <button onClick={startNewChat} className="hover:bg-white/20 p-1.5 rounded-full transition-colors" title="New chat" aria-label="New chat">
               <Plus className="w-4 h-4" />
             </button>
-            {sessions.filter(s => s.messages.length > 1).length > 0 && (
+            {(sessions.filter(s => s.messages.length > 1).length > 0 || (authToken && remoteSessions.length > 0)) && (
               <button onClick={() => setView("sessions")} className="hover:bg-white/20 p-1.5 rounded-full transition-colors" title="Chat history" aria-label="Chat history">
                 <History className="w-4 h-4" />
               </button>
@@ -527,8 +694,97 @@ export default function AIChatbot() {
   );
 
   // ─── Render: session list ─────────────────────────────────────────────────────
+  /** Groups sessions by Today / Yesterday / This Week / Older / Local */
+  const groupedSessions = () => {
+    const groups: Record<string, DisplaySession[]> = {};
+    
+    if (authToken) {
+      // 1. Group remote sessions by date
+      for (const rSess of remoteSessions) {
+        const group = relativeGroup(rSess.updatedAt);
+        if (!groups[group]) groups[group] = [];
+        groups[group].push({
+          id: rSess.id,
+          name: rSess.title,
+          updatedAt: rSess.updatedAt,
+          type: "remote",
+          rawRemote: rSess
+        });
+      }
+      
+      // 2. Add local sessions to a "Local" group at the bottom
+      const localDisplay: DisplaySession[] = [];
+      for (const lSess of sessions) {
+        if (lSess.messages.length <= 1) continue; // skip empty
+        localDisplay.push({
+          id: lSess.id,
+          name: lSess.name,
+          updatedAt: lSess.updatedAt,
+          type: "local",
+          messageCount: lSess.messages.filter(m => m.sender === "user").length,
+          rawLocal: lSess
+        });
+      }
+      if (localDisplay.length > 0) {
+        localDisplay.sort((a, b) => b.updatedAt - a.updatedAt);
+        groups["Local"] = localDisplay;
+      }
+    } else {
+      // Guest: group local sessions by date
+      for (const lSess of sessions) {
+        if (lSess.messages.length <= 1) continue; // skip empty
+        const group = relativeGroup(lSess.updatedAt);
+        if (!groups[group]) groups[group] = [];
+        groups[group].push({
+          id: lSess.id,
+          name: lSess.name,
+          updatedAt: lSess.updatedAt,
+          type: "local",
+          messageCount: lSess.messages.filter(m => m.sender === "user").length,
+          rawLocal: lSess
+        });
+      }
+    }
+    return groups;
+  };
+
+  const getGroupOrder = () => {
+    return authToken
+      ? ["Today", "Yesterday", "This Week", "Older", "Local"]
+      : ["Today", "Yesterday", "This Week", "Older"];
+  };
+
   const renderSessionsList = () => {
+    if (isLoadingRemote) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full gap-3 p-6 bg-transparent">
+          <Loader2 className="w-8 h-8 text-[#5C1218] animate-spin" />
+          <p className="text-gray-400 text-sm">Loading your chats…</p>
+        </div>
+      );
+    }
+    
+    if (remoteError) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full gap-3 p-6 bg-transparent">
+          <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
+            <X className="w-6 h-6 text-red-500/60" />
+          </div>
+          <p className="text-gray-600 text-sm text-center font-medium">Failed to load past chats.<br />Please check your connection.</p>
+          <button
+            onClick={() => {
+              if (authToken) fetchRemoteSessions(authToken);
+            }}
+            className="mt-2 text-xs font-semibold px-4 py-2 rounded-full bg-[#5C1218] text-white hover:bg-[#70161E] transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+
     const groups = groupedSessions();
+    const groupOrder = getGroupOrder();
     const hasAny = Object.keys(groups).length > 0;
 
     return (
@@ -542,7 +798,7 @@ export default function AIChatbot() {
           </div>
         ) : (
           <div className="p-3 space-y-4">
-            {GROUP_ORDER.map((group) => {
+            {groupOrder.map((group) => {
               const sessionsInGroup = groups[group];
               if (!sessionsInGroup?.length) return null;
               return (
@@ -552,7 +808,13 @@ export default function AIChatbot() {
                     {sessionsInGroup.map((sess) => (
                       <motion.button
                         key={sess.id}
-                        onClick={() => resumeSession(sess)}
+                        onClick={() => {
+                          if (sess.type === "remote") {
+                            if (authToken) resumeRemoteSession(sess.rawRemote!, authToken);
+                          } else {
+                            resumeSession(sess.rawLocal!);
+                          }
+                        }}
                         whileHover={{ x: 2 }}
                         className={`w-full text-left rounded-xl px-3 py-2.5 transition-colors border ${
                           sess.id === activeSession.id
@@ -561,11 +823,19 @@ export default function AIChatbot() {
                         }`}
                       >
                         <div className="flex items-start gap-2">
-                          <MessageCircle className="w-3.5 h-3.5 text-[#5C1218]/50 flex-shrink-0 mt-0.5" />
+                          {sess.type === "remote" ? (
+                            <Cloud className="w-3.5 h-3.5 text-[#5C1218]/50 flex-shrink-0 mt-0.5" />
+                          ) : (
+                            <MessageCircle className="w-3.5 h-3.5 text-[#5C1218]/50 flex-shrink-0 mt-0.5" />
+                          )}
                           <div className="min-w-0 flex-1">
                             <p className="text-xs font-semibold text-gray-800 truncate">{sess.name || "Untitled Chat"}</p>
                             <p className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1.5">
-                              <span>{sess.messages.filter(m => m.sender === "user").length} messages</span>
+                              {sess.type === "remote" ? (
+                                <span>Cloud Chat</span>
+                              ) : (
+                                <span>{sess.messageCount} messages</span>
+                              )}
                               <span>·</span>
                               <span>{friendlyTime(sess.updatedAt)}</span>
                             </p>
@@ -587,69 +857,80 @@ export default function AIChatbot() {
   };
 
   // ─── Render: current chat body ────────────────────────────────────────────────
-  const renderCurrentChat = (expanded: boolean) => (
-    <>
-      <div className={`flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-transparent scroll-smooth ${expanded ? "text-base" : "text-sm"}`} data-lenis-prevent>
-        {activeSession.messages.map((msg) => renderBubble(msg, expanded))}
-        {isLoading && (
-          <div className="flex gap-2.5 items-start justify-start">
-            <div className={`rounded-full bg-[#5C1218] flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 animate-pulse ${expanded ? "w-8 h-8" : "w-7 h-7"}`}>
-              <Sparkles className={`text-[#E5B94E] ${expanded ? "w-4 h-4" : "w-3.5 h-3.5"}`} />
-            </div>
-            <div className="bg-white/90 border border-white/50 text-gray-800 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-2">
-              <span className="text-gray-400 text-sm">Typing</span>
-              <span className="flex gap-1">
-                <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping" />
-                <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping [animation-delay:0.2s]" />
-                <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping [animation-delay:0.4s]" />
-              </span>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Quick suggestions */}
-      <div className={`px-4 bg-transparent border-t border-white/20 flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth ${expanded ? "py-3" : "py-2"}`} data-lenis-prevent>
-        {SUGGESTIONS.map((s, idx) => (
-          <button
-            key={idx}
-            type="button"
-            onClick={() => { if (!isLoading) submitMessage(s.query); }}
-            className="flex-shrink-0 text-[11px] md:text-xs font-semibold px-3 py-1.5 rounded-full bg-white/80 border border-white/50 text-[#5C1218] hover:bg-white hover:border-[#E5B94E] transition-colors shadow-xs cursor-pointer"
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Input */}
-      <div className={`p-4 bg-white/50 backdrop-blur-md border-t border-white/30 flex-shrink-0 ${expanded ? "md:p-6" : ""}`}>
-        <form onSubmit={handleSend} className="flex gap-2">
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            disabled={isLoading}
-            placeholder={isLoading ? "Thinking…" : "Ask about our collections…"}
-            className={`flex-1 bg-white/70 rounded-full px-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#5C1218] transition-shadow disabled:opacity-75 ${expanded ? "py-3 text-base" : "py-2"}`}
-          />
-          <button
-            type="submit"
-            disabled={!inputValue.trim() || isLoading}
-            className={`rounded-full bg-[#E5B94E] text-[#5C1218] flex items-center justify-center hover:bg-[#d4a944] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 ${expanded ? "w-12 h-12" : "w-10 h-10"}`}
-            aria-label="Send Message"
-          >
-            <Send className={`${expanded ? "w-5 h-5" : "w-4 h-4"} ml-0.5`} />
-          </button>
-        </form>
-        <div className="text-center mt-2">
-          <span className="text-[9px] text-gray-500 uppercase tracking-widest">Powered by AI</span>
+  const renderCurrentChat = (expanded: boolean) => {
+    if (isLoadingSessionDetail) {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 p-6 bg-transparent">
+          <Loader2 className="w-8 h-8 text-[#5C1218] animate-spin" />
+          <p className="text-gray-400 text-sm">Loading conversation history…</p>
         </div>
-      </div>
-    </>
-  );
+      );
+    }
+
+    return (
+      <>
+        <div className={`flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-transparent scroll-smooth ${expanded ? "text-base" : "text-sm"}`} data-lenis-prevent>
+          {activeSession.messages.map((msg) => renderBubble(msg, expanded))}
+          {isLoading && (
+            <div className="flex gap-2.5 items-start justify-start">
+              <div className={`rounded-full bg-[#5C1218] flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 animate-pulse ${expanded ? "w-8 h-8" : "w-7 h-7"}`}>
+                <Sparkles className={`text-[#E5B94E] ${expanded ? "w-4 h-4" : "w-3.5 h-3.5"}`} />
+              </div>
+              <div className="bg-white/90 border border-white/50 text-gray-800 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-2">
+                <span className="text-gray-400 text-sm">Typing</span>
+                <span className="flex gap-1">
+                  <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping" />
+                  <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping [animation-delay:0.2s]" />
+                  <span className="w-1 h-1 rounded-full bg-[#E5B94E] animate-ping [animation-delay:0.4s]" />
+                </span>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Quick suggestions */}
+        <div className={`px-4 bg-transparent border-t border-white/20 flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth ${expanded ? "py-3" : "py-2"}`} data-lenis-prevent>
+          {SUGGESTIONS.map((s, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => { if (!isLoading) submitMessage(s.query); }}
+              className="flex-shrink-0 text-[11px] md:text-xs font-semibold px-3 py-1.5 rounded-full bg-white/80 border border-white/50 text-[#5C1218] hover:bg-white hover:border-[#E5B94E] transition-colors shadow-xs cursor-pointer"
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Input */}
+        <div className={`p-4 bg-white/50 backdrop-blur-md border-t border-white/30 flex-shrink-0 ${expanded ? "md:p-6" : ""}`}>
+          <form onSubmit={handleSend} className="flex gap-2">
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              disabled={isLoading}
+              placeholder={isLoading ? "Thinking…" : "Ask about our collections…"}
+              className={`flex-1 bg-white/70 rounded-full px-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#5C1218] transition-shadow disabled:opacity-75 ${expanded ? "py-3 text-base" : "py-2"}`}
+            />
+            <button
+              type="submit"
+              disabled={!inputValue.trim() || isLoading}
+              className={`rounded-full bg-[#E5B94E] text-[#5C1218] flex items-center justify-center hover:bg-[#d4a944] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 ${expanded ? "w-12 h-12" : "w-10 h-10"}`}
+              aria-label="Send Message"
+            >
+              <Send className={`${expanded ? "w-5 h-5" : "w-4 h-4"} ml-0.5`} />
+            </button>
+          </form>
+          <div className="text-center mt-2">
+            <span className="text-[9px] text-gray-500 uppercase tracking-widest">Powered by AI</span>
+          </div>
+        </div>
+      </>
+    );
+  };
 
   // ─── Full panel ───────────────────────────────────────────────────────────────
   const renderChatPanel = (expanded: boolean) => (
