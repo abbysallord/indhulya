@@ -12,6 +12,7 @@ export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoadingPincode, setIsLoadingPincode] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const router = useRouter();
   
   const { cartCount, wishlistCount, isMounted, deliveryLocation, setDeliveryLocation, isLoggedIn, logout } = useStore();
@@ -157,7 +158,7 @@ export default function Header() {
             <MapPin className="w-5 h-5" />
           </Link>
           {isMounted && isLoggedIn ? (
-            <button onClick={logout} className="relative text-gray-700 hover:text-black p-2 flex items-center gap-1.5 group whitespace-nowrap" aria-label="Logout">
+            <button onClick={() => setShowLogoutConfirm(true)} className="relative text-gray-700 hover:text-black p-2 flex items-center gap-1.5 group whitespace-nowrap" aria-label="Logout">
               <User className="w-5 h-5 shrink-0" />
               <span className="hidden lg:block text-xs font-semibold uppercase tracking-wider group-hover:underline">Logout</span>
             </button>
@@ -199,6 +200,50 @@ export default function Header() {
           <li className="cursor-pointer hover:text-black transition-colors" onClick={() => setIsMobileMenuOpen(false)}><Link href="/products?search=Jhumkas">Jhumkas</Link></li>
         </ul>
       </nav>
+
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => setShowLogoutConfirm(false)}
+            />
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="relative bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl border border-white overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-[#5C1218]" />
+              <h3 className="text-2xl font-serif text-[#5C1218] mb-2">Sign Out</h3>
+              <p className="text-sm text-gray-600 mb-8 leading-relaxed">
+                Are you sure you want to log out? Your wishlist and cart will be saved securely.
+              </p>
+              <div className="flex items-center gap-3 w-full">
+                <button 
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 py-3 px-4 rounded-xl text-sm font-bold uppercase tracking-wider text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    logout();
+                    setShowLogoutConfirm(false);
+                  }}
+                  className="flex-1 py-3 px-4 rounded-xl text-sm font-bold uppercase tracking-wider text-white bg-[#5C1218] hover:bg-[#70161E] shadow-md transition-colors"
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
