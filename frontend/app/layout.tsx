@@ -54,7 +54,7 @@ import { StoreProvider } from "@/context/StoreContext";
 import { Analytics } from "@vercel/analytics/next";
 
 const AIChatbot = dynamic(() => import("@/components/AIChatbot"));
-const AdPopup = dynamic(() => import("@/components/AdPopup"), { ssr: false });
+const AdPopup = dynamic(() => import("@/components/AdPopup"));
 
 export default function RootLayout({
   children,
