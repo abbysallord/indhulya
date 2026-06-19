@@ -14,7 +14,7 @@ export default function Header() {
   const [isLoadingPincode, setIsLoadingPincode] = useState(false);
   const router = useRouter();
   
-  const { cartCount, wishlistCount, isMounted, deliveryLocation, setDeliveryLocation } = useStore();
+  const { cartCount, wishlistCount, isMounted, deliveryLocation, setDeliveryLocation, isLoggedIn, logout } = useStore();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,10 +156,17 @@ export default function Header() {
           <Link href="/store-locator" className="hidden sm:block text-gray-700 hover:text-black p-2" aria-label="Store Locator">
             <MapPin className="w-5 h-5" />
           </Link>
-          <Link href="/auth" className="relative text-gray-700 hover:text-black p-2 flex items-center gap-1.5 group whitespace-nowrap" aria-label="Login">
-            <User className="w-5 h-5 shrink-0" />
-            <span className="hidden lg:block text-xs font-semibold uppercase tracking-wider group-hover:underline">Sign In</span>
-          </Link>
+          {isMounted && isLoggedIn ? (
+            <button onClick={logout} className="relative text-gray-700 hover:text-black p-2 flex items-center gap-1.5 group whitespace-nowrap" aria-label="Logout">
+              <User className="w-5 h-5 shrink-0" />
+              <span className="hidden lg:block text-xs font-semibold uppercase tracking-wider group-hover:underline">Logout</span>
+            </button>
+          ) : (
+            <Link href="/auth" className="relative text-gray-700 hover:text-black p-2 flex items-center gap-1.5 group whitespace-nowrap" aria-label="Login">
+              <User className="w-5 h-5 shrink-0" />
+              <span className="hidden lg:block text-xs font-semibold uppercase tracking-wider group-hover:underline">Sign In</span>
+            </Link>
+          )}
           <Link href="/wishlist" className="relative text-gray-700 hover:text-black p-2" aria-label="Wishlist">
             <Heart className="w-5 h-5" />
             {isMounted && wishlistCount > 0 && (

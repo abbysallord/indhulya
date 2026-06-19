@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Mail, Lock, User, ArrowRight, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
+import { useStore } from "@/context/StoreContext";
 import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
@@ -14,6 +16,7 @@ export default function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { login } = useStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,15 +33,6 @@ export default function AuthPage() {
     }
 
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-    const endpoint = isSignUp ? "/chat/register" : "/auth/login"; // Check backend mount prefixes: mount `/chat` for router.include_router or check route prefixes
-    // Wait! Let's check backend mount prefix in main.py:
-    // app.include_router(auth.router, prefix="/auth", tags=["Auth"])
-    // So endpoint is '/auth/login' or '/auth/register' depending on where they are registered.
-    // Wait, let's verify where `/register` is mounted. In main.py:
-    // app.include_router(auth.router, prefix="/auth", tags=["Auth"])
-    // And in auth.py:
-    // @router.post("/register")
-    // So the endpoint is `/auth/register`!
     const targetEndpoint = isSignUp ? "/auth/register" : "/auth/login";
     
     const body = isSignUp 
@@ -68,9 +62,7 @@ export default function AuthPage() {
         localStorage.setItem("indhulya_auth_email", data.user_email);
         localStorage.setItem("indhulya_auth_user_id", data.user_id);
         
-        // Trigger storage event so that Header/Navbar state refreshes instantly
-        window.dispatchEvent(new Event("storage"));
-        
+        login();
         router.push("/");
       }
     } catch (err: any) {
