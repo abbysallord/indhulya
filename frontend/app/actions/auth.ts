@@ -7,7 +7,10 @@ export async function login(formData: FormData) {
   const username = formData.get("username");
   const password = formData.get("password");
 
-  if (username === "admin" && password === "indhulya2026") {
+  const ADMIN_USER = process.env.ADMIN_USERNAME || "admin";
+  const ADMIN_PASS = process.env.ADMIN_PASSWORD || "Indhulya_Secure@2026!";
+
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
     const cookieStore = await cookies();
     cookieStore.set("admin_token", "authenticated_indhulya_admin_v1", {
       httpOnly: true,
